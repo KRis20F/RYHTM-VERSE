@@ -1,0 +1,118 @@
+body {
+    background-color: #000;
+    color: #fff;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+/* Área del juego */
+.game-container {
+    display: flex;
+    justify-content: space-around;
+    width: 400px;
+    height: 600px;
+    border: 2px solid #000;
+    background-color: #333;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Columnas */
+.column {
+    width: 80px;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+.hit-zone {
+    position: absolute;
+    bottom: 22px;
+    width: 21px;
+    height: 35px;        
+    padding: 1.5em;
+    background-image: url('./img/nota-transparente.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+/* Notas */
+.note {
+    width: 100%;
+    height: 90px;    
+    text-align: center;
+    position: absolute;
+    background-image: url('./img/nota.png');
+    /* background-color: aqua; */
+    background-repeat: no-repeat;
+    background-size: contain;
+    display: flex;
+    left: 20px;
+    margin-inline: 1em;
+    top: -20px; /* Inician fuera de la pantalla */
+}
+
+/* Zona de acierto */
+
+
+.column:first-child > .hit-zone {
+    transform: rotate(179deg);
+}
+
+.column:nth-child(2) > .hit-zone {
+    transform: rotate(90deg);
+}
+
+.column:nth-child(3) > .hit-zone {
+    transform: rotate(-90deg);
+}
+
+.column:nth-child(4) > .hit-zone {
+    transform: rotate(358deg);
+}
+
+
+/* Flecha hacia abajo */
+.note.down {
+    background-color: transparent;
+    transform: translateX(-50%) rotate(90deg);
+}
+.note.down::after {font-size: 48px;}
+
+.note.up {
+    background-color: transparent;
+    transform: translateX(-50%) rotate(-90deg);
+}
+.note.up::after {font-size: 48px;}
+
+/* Flecha hacia la izquierda */
+.note.left {
+    background-color: transparent;
+    transform: translateX(-50%) rotate(-179deg);
+}
+.note.left::after {font-size: 48px;}
+
+/* Flecha hacia la derecha */
+.note.right {
+    /* background-image: url('./img/nota.png'); */
+    transform: translateX(-50%) rotate(358deg);
+    
+}
+
+
+    /* .hit-zone::after {
+        content: '';
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        border-top: 30px solid cyan;
+        margin-left: -9px;
+        margin-top: 24px;
+    } */
+    
+    /* Flecha hacia arriba */

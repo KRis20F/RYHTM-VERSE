@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Osu!Mania con Efecto de Corte</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+    <h1>Osu!Mania con Efecto de Corte</h1>
+    <input type="file" id="fileInput" accept=".osz" placeholder="arhc¡" />
+    
+    <div class="container">
+        <div class="game-container">
+            <div class="column" data-key="d" data-direction="left">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column" data-key="f" data-direction="down">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column" data-key="j" data-direction="up">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column" data-key="k" data-direction="right">
+                <div class="hit-zone"></div>
+            </div>
+        </div>
+    </div>
+    
+
+    <script src="./game.js"></script>
+
+</body>
+</html>

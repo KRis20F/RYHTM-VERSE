@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- <link rel="stylesheet" href="./background.css"> -->
+    <style>
+        @import url("https://fonts.googleapis.com/css2?family=Russo+One&family=Yellowtail&display=swap");
+:root {
+	--navy: #0c0c4a;
+	--dark-navy: #060726;
+	--pink: rgba(213, 84, 213, 1);
+	--pink2: rgba(213, 84, 213, 0.7);
+}
+* {
+	margin: 0;
+	padding: 0;
+}
+*::before,
+::after {
+	content: "";
+	position: absolute;
+}
+body {
+	width: 100vw;
+
+	height: 100vh;
+
+	background: black;
+	display: grid;
+	place-items: center;
+	filter: saturate(130%) contrast(125%);
+    z-index: -2;
+}
+#image {
+	overflow: hidden;
+	width: 80%;
+	height: 55%;
+	background: var(--navy);
+	display: grid;
+
+	position: relative;
+	border: 8px solid;
+	border-color: darkmagenta magenta;
+	outline: 8px ridge cyan;
+	outline-offset: 4px;
+    z-index: -1;
+}
+#top {
+	height: 67%;
+	background: linear-gradient(transparent 50%, hotpink 160%);
+	box-shadow: 0 15px 50px 1px white;
+	position: relative;
+    z-index: -1;
+}
+#sky {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 100%;
+
+	background: repeating-linear-gradient(
+			pink 2px,
+			transparent 3px,
+			transparent 30px
+		),
+		repeating-linear-gradient(90deg, pink 2px, transparent 3px, transparent 40px)
+			10px 0;
+	filter: drop-shadow(0 0 1px magenta) drop-shadow(0 0 3px magenta)
+		drop-shadow(0 0 7px cyan);
+	animation: move 30s linear infinite;
+	opacity: 0.2;
+    z-index: -1;
+}
+#bottom {
+	position: absolute;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	transform: perspective(500px) rotateX(65deg);
+	bottom: -15%;
+	background: linear-gradient(
+		90deg,
+		hotpink -60%,
+		transparent 40%,
+		transparent 60%,
+		hotpink 140%
+	);
+	clip-path: polygon(0 100%, 0 55%, 100% 55%, 100% 100%);
+    z-index: -1;
+}
+
+#ground {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 55%;
+	background: repeating-linear-gradient(
+			white 2px,
+			transparent 3px,
+			transparent 30px
+		),
+		repeating-linear-gradient(90deg, white 2px, transparent 3px, transparent 40px);
+	filter: drop-shadow(0 0 1px cyan) drop-shadow(0 0 3px cyan)
+		drop-shadow(0 0 7px cyan);
+	animation: move 30s linear infinite;
+    z-index: -1;
+}
+
+#text {
+	position: absolute;
+	z-index: 10;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	display: flex;
+	flex-direction: column;
+	place-items: center;
+	justify-content: center;
+    z-index: -1;
+}
+h1 {
+	color: transparent;
+	font-family: "Russo One", sans-serif;
+	text-transform: uppercase;
+	font-size: 5em;
+	transform: translatey(25px);
+	background: linear-gradient(
+		cornflowerblue 30%,
+		white,
+		darkmagenta 60%,
+		cornflowerblue 100%
+	);
+	background-size: contain;
+	-webkit-background-clip: text;
+	-webkit-text-stroke: 1px silver;
+	filter: drop-shadow(5px 5px 1px black) drop-shadow(1px 1px 1px magenta);
+	animation: bg-shift 5s ease-in-out infinite alternate;
+    z-index: -1;
+}
+h2 {
+	color: white;
+	font-family: "Yellowtail", cursive;
+	font-weight: 100;
+	font-size: 3em;
+	transform: translatey(0px) rotatez(0deg);
+	text-shadow: 0 0 3px magenta, 0 0 7px magenta, 0 0 15px black, 0 0 15px black;
+	/* animation: hover 5s ease-in-out infinite;*/
+    z-index: -1;
+}
+@keyframes move {
+	to {
+		background-position-y: 2000px;
+	}
+}
+@keyframes bg-shift {
+	0% {
+		background-position: 0 -25px;
+	}
+	100% {
+		background-position: 0 25px;
+	}
+}
+
+@keyframes hover {
+	0% {
+		transform: translatey(-10px) rotatez(-5deg) perspective(200px) translatez(0);
+	}
+	50% {
+		transform: translatey(-10px) rotatez(-5deg) perspective(200px)
+			translatez(50px);
+	}
+	100% {
+		transform: translatey(-10px) rotatez(-5deg) perspective(200px) translatez(0);
+	}
+}
+
+a {
+	width: 100px;
+	height: 75px;
+	position: absolute;
+	bottom: 10px;
+	right: 10px;
+}
+img {
+	width: 100%;
+}
+
+
+.container {
+    display: flex;
+    justify-content: center;
+}
+/* Área del juego */
+.game-container {
+    display: flex;
+    justify-content: space-around;
+    width: 400px;
+    height: 600px;
+    border: 2px solid #000;
+    background-color: #333;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Columnas */
+.column {
+    width: 80px;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* Notas */
+.note {
+    width: 21px;
+    height: 35px;    
+    background-color: cyan;
+    position: absolute;
+    top: -20px; /* Inician fuera de la pantalla */
+}
+
+.note::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 30px solid cyan;
+    margin-left: -9px;
+    margin-top: 24px;
+}
+
+/* Zona de acierto */
+.hit-zone {
+    position: absolute;
+    bottom: 22px;
+    width: 21px;
+    height: 35px;        
+    background-color: cyan;
+}
+
+.hit-zone::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 20px solid transparent;
+    border-right: 20px solid transparent;
+    border-top: 30px solid cyan;
+    margin-left: -9px;
+    margin-top: 24px;
+}
+/* 
+.hit-zone:first-child {
+}  */
+
+.column:first-child > .hit-zone {
+    transform: rotate(92deg);
+}
+
+.column:nth-child(2) > .hit-zone {
+    transform: rotate(180deg);
+}
+
+.column:nth-child(4) > .hit-zone {
+    transform: rotate(268deg);
+}
+</style>
+</head>
+<body>
+    <div id="image">
+        <div id="top">
+            <div id="sky"></div>
+        </div>
+        <div id="bottom">
+            <div id="ground"></div>
+        </div>
+    </div>
+    <h1>Osu!Mania con Efecto de Corte</h1>
+    <div class="container">
+        <div class="game-container">
+            <div class="column" data-key="d">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column data-key="up"" data-key="f">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column" data-key="j">
+                <div class="hit-zone"></div>
+            </div>
+            <div class="column" data-key="k">
+                <div class="hit-zone"></div>
+            </div>
+        </div>
+    </div>
+
+    
+</body>
+</html>
