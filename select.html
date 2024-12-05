@@ -1,22 +1,35 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Dificultad</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <link rel="stylesheet" href="./dificultad.css">
+    <title>Seleccionar Archivo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        .difficulty-buttons {
+            margin-top: 20px;
+        }
+        .difficulty-buttons button {
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <h1>Selecciona la Dificultad</h1>
-    <div class="custom-file-input">
-        <button id="uploadButton">Cargar Archivo</button>
-        <input type="file" id="fileInput" accept=".osz" />
-    </div>
-    <div id="difficultyBox" class="hidden">
-        <h2>Dificultades Disponibles</h2>
-        <div class="difficulty-options"></div>
-    </div>    
-    <script src="./music/changeDificult.js"></script>
+    <h1>Selecciona tu archivo .osz</h1>
+    <input type="file" id="fileInput" accept=".osz">
+    <h2>Dificultades</h2>
+
+    
+    <div id="difficultyContainer"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="./changeDificult.js"></script>
 </body>
 </html>
