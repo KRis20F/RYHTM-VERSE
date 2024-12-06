@@ -19,8 +19,7 @@ async function loadOsz(file) {
     // Buscar archivos .osu y el archivo de audio en el .osz
     Object.keys(contents.files).forEach((filename) => {
         if (filename.endsWith('.osu')) osuFile = contents.files[filename]; // Archivo del mapa
-        if (filename.endsWith('.mp3') || filename.endsWith('.ogg')) audioFile = contents.files[filename]; // Archivo de audio
-        console.log(audioFile);
+        if (filename.toLowerCase() === 'audio.mp3') audioFile = contents.files[filename]; // Archivo de audio        console.log(audioFile);
     });
 
     if (!osuFile || !audioFile) {
@@ -35,14 +34,15 @@ async function loadOsz(file) {
 
     const difficulties = parseDifficulties(osuText); // Extraer todas las secciones de dificultad
 
-    // Procesar el archivo de audio
+    //Procesar el archivo de audio
     try {
-        const audioBlob = await audioFile.async('blob'); // Crear el Blob de audio
-        const audioUrl = URL.createObjectURL(audioBlob); // Crear una URL temporal
+        
+        const audioBlob = await audioFile.async('base64'); // Convertir audio a Base64
+        const audioBase64 = `data:audio/mp3;base64,${audioBlob}`;
 
-        // Almacenar la URL del audio y las dificultades en sessionStorage
-        sessionStorage.setItem('audioUrl', audioUrl); // Almacenar la URL temporal del audio
-        sessionStorage.setItem('osuContent', osuText); // Almacenar el contenido del mapa
+        sessionStorage.setItem('audioData', audioBase64); // Guardar el audio en Base64
+        sessionStorage.setItem('osuContent', osuText);
+        
         console.log('Mapa y audio cargados.');
     } catch (error) {
         console.error('Error al intentar cargar el archivo de audio:', error);
@@ -89,13 +89,14 @@ function displayDifficulties(difficulties) {
 
 // Manejar la selección de una dificultad
 function selectDifficulty(difficulty) {
-    const audioUrl = sessionStorage.getItem('audioUrl');
+    const audioData = sessionStorage.getItem('audioUrl');
+    console.log(audioData);
 
-    if (!audioUrl) {
-        alert('No se cargó un archivo de audio. Volviendo a la página principal.');
-        window.location.href = 'index.html';
-        return;
-    }
+    // if (!audioData) {
+    //     alert('No se cargó un archivo de audio. Volviendo a la página principal.');
+    //     window.location.href = 'select.html';
+    //     return;
+    // }
 
     sessionStorage.setItem('selectedDifficulty', difficulty); // Guardar la dificultad seleccionada
     console.log(`Dificultad seleccionada: ${difficulty}`);

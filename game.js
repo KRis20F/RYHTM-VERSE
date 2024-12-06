@@ -1,129 +1,161 @@
 document.addEventListener('DOMContentLoaded', () => {
     const selectedDifficulty = sessionStorage.getItem('selectedDifficulty');
     const osuContent = sessionStorage.getItem('osuContent');
-    const audioUrl = sessionStorage.getItem('audioUrl');
+    const audioData = sessionStorage.getItem('audioData');
 
-    if (!selectedDifficulty || !osuContent || !audioUrl) {
+    // Validar que los datos necesarios estén presentes
+    if (!selectedDifficulty || !osuContent || !audioData) {
         alert('Por favor, selecciona una dificultad primero.');
-        window.location.href = 'index.html'; // Redirigir si no hay datos
-    } else {
-        // Mostrar la dificultad seleccionada
-        const difficultyLabel = document.getElementById('difficultyLabel');
-        if (difficultyLabel) {
-            difficultyLabel.textContent = `Dificultad: ${selectedDifficulty}`;
-        }
-
-        // Cargar el mapa de notas y asignar el audio
-        parseOsuMap(osuContent);
-        const audio = new Audio(audioUrl); // Crear un objeto de audio con la URL
-        audio.play(); // Reproducir el audio
-        startGame(); // Iniciar el juego
+        window.location.href = 'select.html';
+        return;
     }
+
+    document.getElementById('difficultyLabel').textContent = `Dificultad: ${selectedDifficulty}`;
+
+    // Parsear el archivo .osu para obtener los objetos
+    const hitObjects = parseOsuMap(osuContent);
+
+    // Crear el objeto de audio usando el Base64 almacenado
+    const audio = new Audio(audioData);
+
+    // Depurar audio para asegurar que se cargue correctamente
+    audio.addEventListener('canplay', () => {
+        console.log('Audio cargado correctamente. Reproduciendo...');
+        audio.play();
+        startGame(hitObjects, audio);
+    });
+
+    audio.addEventListener('error', () => {
+        console.error('Error al cargar el audio. Verifica que el archivo .mp3 sea válido.');
+    });
 });
 
-
-
-const columns = document.querySelectorAll('.column');
-let audio = new Audio(); // Archivo de audio cargado
-let hitObjects = []; // Notas del mapa
-let startTime = 0; // Tiempo inicial de reproducción
-
-const noteSpeed = 12; // Velocidad de las notas
-
-// Parsear mapa
+// Parsear el archivo .osu para obtener las notas (HitObjects)
 function parseOsuMap(osuText) {
     const lines = osuText.split('\n');
+    const hitObjects = [];
     let inHitObjectsSection = false;
+
+    console.log("Procesando el archivo .osu...");
 
     for (let line of lines) {
         line = line.trim();
         if (line === '[HitObjects]') {
+            console.log("Sección [HitObjects] encontrada.");
             inHitObjectsSection = true;
-            continue;
+            continue; // Saltar esta línea
         }
-        if (line.startsWith('[') && inHitObjectsSection) {
-            inHitObjectsSection = false;
-        }
+        if (line.startsWith('[') && inHitObjectsSection) break;
+
         if (inHitObjectsSection && line) {
-            const [x, , time] = line.split(',').map(val => parseInt(val));
-            const column = Math.floor((x / 512) * columns.length);
+            const parts = line.split(',');
+            if (parts.length < 3) {
+                console.warn("Línea malformada en [HitObjects]:", line);
+                continue;
+            }
+
+            const [x, , time] = parts.map(Number);
+            const column = Math.floor((x / 512) * 4); // Asumiendo 4 columnas
             hitObjects.push({ time, column });
         }
     }
-    console.log('Notas cargadas:', hitObjects);
+
+    if (hitObjects.length === 0) {
+        console.error("No se encontraron objetos en [HitObjects].");
+    } else {
+        console.log("Objetos encontrados:", hitObjects.length);
+    }
+
+    return hitObjects;
 }
 
-// Función para iniciar el juego
-function startGame() {
-    startTime = Date.now();
-    renderNotes();
-}
-
-function renderNotes() {
+// Iniciar el juego
+function startGame(hitObjects, audio) {
+    const columns = document.querySelectorAll('.column');
     const interval = setInterval(() => {
-        const currentTime = Date.now() - startTime;
+        const currentTime = audio.currentTime * 1000; // Convertir tiempo a milisegundos
+        console.log(`Tiempo actual del audio: ${currentTime}`);
+
         hitObjects.forEach((hit, index) => {
-            if (currentTime >= hit.time - 200 && currentTime <= hit.time + 200) {
-                spawnNote(hit.column);
-                hitObjects.splice(index, 1); // Eliminar nota de la lista
+            // console.log(`Revisando nota: tiempo=${hit.time}, columna=${hit.column}`);
+            if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
+                spawnNote(columns[hit.column]);
+                hitObjects.splice(index, 1); // Eliminar la nota procesada
             }
         });
 
-        if (hitObjects.length === 0) {
-            clearInterval(interval); // Detener el juego cuando se terminen las notas
+        if (!hitObjects.length) {
+            console.log("Todas las notas se han procesado.");
+            clearInterval(interval);
         }
     }, 10);
 }
 
-function spawnNote(columnIndex) {
-    const column = columns[columnIndex];
+// Crear y mover las notas
+function spawnNote(column) {
+    if (!column) {
+        console.error("Columna no válida para spawnNote.");
+        return;
+    }
+
+
     const note = document.createElement('div');
     note.classList.add('note');
+    note.style.top = '0px'; // Posición inicial
     column.appendChild(note);
 
+    console.log(`Nota creada en columna.`);
+
+    
     const direction = column.getAttribute('data-direction');
     note.classList.add(direction);  // Esto agrega 'down', 'up', 'left', o 'right'
 
     column.appendChild(note);
     moveNoteDown(note);
 
-    let notePosition = 0;
-    const noteInterval = setInterval(() => {
-        if (notePosition < 600) {
-            notePosition += noteSpeed;
-            note.style.top = notePosition + 'px';
-        } else {
-            clearInterval(noteInterval); // Eliminar la nota si alcanza el final
-            column.removeChild(note);
-        }
-    }, 10);
+    // Mover nota hacia abajo
+    moveNoteDown(note);
+
+    console.log(note + "resultado");
 }
 
 function moveNoteDown(note) {
     let position = 0;
+    const noteSpeed = 15; // Velocidad de las notas
     const interval = setInterval(() => {
         position += noteSpeed; // Actualizar la posición de la nota
-        note.style.top = position + 'px';
-        if (position > 540) { // Si la nota ha pasado la parte inferior de la pantalla
-            note.remove();
+        note.style.top = `${position}px`;
+
+        if (position > 540) { // Si la nota sale de la pantalla
+            console.log('Nota eliminada: salió de la pantalla.');
             clearInterval(interval);
+            note.remove();
         }
     }, 20);
 }
 
-// Detectar si la tecla presionada corresponde a una columna y si la nota es un acierto
+// Detectar si la tecla presionada corresponde a una columna
 document.addEventListener('keydown', (event) => {
+    const columns = document.querySelectorAll('.column');
     const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
     const note = column ? column.querySelector('.note') : null;
 
     if (note) {
-        const notePosition = parseInt(note.style.top);
-        if (notePosition >= 460 && notePosition <= 500) { // Rango de acierto
+        const notePosition = parseInt(note.style.top, 10);
+        console.log(`Posición de la nota al presionar: ${notePosition}`);
+
+        if (notePosition >= 460 && notePosition <= 500) {
             console.log('¡Acierto!');
-            note.remove(); // Eliminar la nota al acertar
-        } else {
+            note.remove();
+        } if (note.parentElement) note.remove(); // Verificar que la nota exista antes de eliminarla
+        } else if (notePosition < 460) {
+            console.log('Acierto temprano, nota eliminada');
+            if (note.parentElement) note.remove();
+        } else if (notePosition > 500) {
+            console.log('Acierto tardío, nota eliminada');
+            if (note.parentElement) note.remove();
+        }else {
             console.log('¡Fallo!');
-            note.remove(); // Eliminar la nota si se falla
         }
     }
-});
+);
