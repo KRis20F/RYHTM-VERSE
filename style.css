@@ -3,6 +3,76 @@ body {
     color: #fff;
 }
 
+
+#judgementDisplay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    pointer-events: none; /* Para que no interfiera con los clicks */
+}
+
+#comboDisplay {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Para las imágenes dentro del combo display */
+#comboDisplay canvas {
+    height: 40px; /* Ajusta según el tamaño que prefieras */
+    width: auto;
+    margin-left: 2px;
+}
+
+/* Para las imágenes de juicio */
+#judgementDisplay canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+
+#scoreDisplay {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+#scoreDisplay canvas {
+    height: 30px;
+    width: auto;
+    margin-left: 1px;
+}
+
+.judgement {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 100px;
+    z-index: 1000;
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+
 .container {
     display: flex;
     justify-content: center;
@@ -102,17 +172,18 @@ body {
     
 }
 
+.hit-value {
+    animation: fadeOut 0.5s forwards;
+}
 
-    /* .hit-zone::after {
-        content: '';
-        position: absolute;
-        width: 0;
-        height: 0;
-        border-left: 20px solid transparent;
-        border-right: 20px solid transparent;
-        border-top: 30px solid cyan;
-        margin-left: -9px;
-        margin-top: 24px;
-    } */
-    
-    /* Flecha hacia arriba */
+#scoreDisplay {
+    display: flex;
+    align-items: center;
+    gap: 2px; /* Espacio entre números */
+}
+
+#scoreDisplay img {
+    height: 30px;
+    width: auto;
+}
+

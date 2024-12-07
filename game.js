@@ -1,22 +1,30 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const selectedDifficulty = sessionStorage.getItem('selectedDifficulty');
+import { skinManager } from './skinManager.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+    const selectedDifficulty = JSON.parse(sessionStorage.getItem('selectedDifficulty'));
     const osuContent = sessionStorage.getItem('osuContent');
-    const audioData = sessionStorage.getItem('audioData');
+    const audioBlob = await getFromIndexedDB('audioFiles', 'currentAudio');
+
+    if (!audioBlob) {
+        alert('No se encontró el archivo de audio. Volviendo a la página principal.');
+        window.location.href = 'select.html';
+        return;
+    }
+
+    const audioUrl = URL.createObjectURL(audioBlob);
+    const audio = new Audio(audioUrl);
 
     // Validar que los datos necesarios estén presentes
-    if (!selectedDifficulty || !osuContent || !audioData) {
+    if (!selectedDifficulty || !osuContent || !audioBlob) {
         alert('Por favor, selecciona una dificultad primero.');
         window.location.href = 'select.html';
         return;
     }
 
-    document.getElementById('difficultyLabel').textContent = `Dificultad: ${selectedDifficulty}`;
+    document.getElementById('difficultyLabel').textContent = `Dificultad: ${selectedDifficulty.title}`;
 
     // Parsear el archivo .osu para obtener los objetos
     const hitObjects = parseOsuMap(osuContent);
-
-    // Crear el objeto de audio usando el Base64 almacenado
-    const audio = new Audio(audioData);
 
     // Depurar audio para asegurar que se cargue correctamente
     audio.addEventListener('canplay', () => {
@@ -77,7 +85,6 @@ function startGame(hitObjects, audio) {
         console.log(`Tiempo actual del audio: ${currentTime}`);
 
         hitObjects.forEach((hit, index) => {
-            // console.log(`Revisando nota: tiempo=${hit.time}, columna=${hit.column}`);
             if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
                 spawnNote(columns[hit.column]);
                 hitObjects.splice(index, 1); // Eliminar la nota procesada
@@ -93,30 +100,17 @@ function startGame(hitObjects, audio) {
 
 // Crear y mover las notas
 function spawnNote(column) {
-    if (!column) {
-        console.error("Columna no válida para spawnNote.");
-        return;
-    }
-
-
     const note = document.createElement('div');
     note.classList.add('note');
     note.style.top = '0px'; // Posición inicial
     column.appendChild(note);
 
-    console.log(`Nota creada en columna.`);
-
-    
     const direction = column.getAttribute('data-direction');
     note.classList.add(direction);  // Esto agrega 'down', 'up', 'left', o 'right'
 
     column.appendChild(note);
-    moveNoteDown(note);
 
-    // Mover nota hacia abajo
     moveNoteDown(note);
-
-    console.log(note + "resultado");
 }
 
 function moveNoteDown(note) {
@@ -134,28 +128,154 @@ function moveNoteDown(note) {
     }, 20);
 }
 
-// Detectar si la tecla presionada corresponde a una columna
+// Primero definimos todas las funciones necesarias
+function showJudgement(type) {
+    console.log('Mostrando judgement:', type);
+    const judgementImage = new Image();
+    judgementImage.src = `./assets/skins/${type}.png`;
+    judgementImage.className = 'judgement';
+    
+    // Limpiar judgements anteriores
+    judgementDisplay.innerHTML = '';
+    judgementDisplay.appendChild(judgementImage);
+    
+    setTimeout(() => {
+        judgementImage.remove();
+    }, 500);
+}
+
+function updateScoreDisplay(score) {
+    const scoreStr = score.toString().padStart(3, '0');
+    const scoreImages = scoreStr.split('').map(num => {
+        const img = new Image();
+        img.src = `./assets/skins/num${num}.png`;
+        return img;
+    });
+    
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    if (!scoreDisplay) {
+        console.error('No se encontró scoreDisplay');
+        return;
+    }
+
+    scoreDisplay.innerHTML = '';
+    
+    scoreImages.forEach(img => {
+        scoreDisplay.appendChild(img);
+    });
+}
+
+let currentScore = 0;
+function updateScore(points) {
+    currentScore += points;
+    updateScoreDisplay(currentScore);
+}
+
+function showHitValue(value) {
+    const hitValueDisplay = document.createElement('div');
+    hitValueDisplay.className = 'hit-value';
+    hitValueDisplay.style.position = 'absolute';
+    hitValueDisplay.style.zIndex = '1000';
+    
+    const valueString = value.toString();
+    for (let digit of valueString) {
+        const digitImg = document.createElement('img');
+        digitImg.src = `./assets/skins/num${digit}.png`;
+        digitImg.style.height = '20px';
+        digitImg.style.width = 'auto';
+        hitValueDisplay.appendChild(digitImg);
+    }
+    
+    const judgementDisplay = document.getElementById('judgementDisplay');
+    if (judgementDisplay) {
+        hitValueDisplay.style.top = '60%';
+        hitValueDisplay.style.left = '50%';
+        hitValueDisplay.style.transform = 'translate(-50%, -50%)';
+        judgementDisplay.appendChild(hitValueDisplay);
+        
+        setTimeout(() => {
+            hitValueDisplay.remove();
+        }, 500);
+    }
+}
+
+// Luego el evento keydown
 document.addEventListener('keydown', (event) => {
     const columns = document.querySelectorAll('.column');
     const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
-    const note = column ? column.querySelector('.note') : null;
+    
+    if (!column) return;
+    
+    const note = column.querySelector('.note');
+    if (!note) return;
 
-    if (note) {
-        const notePosition = parseInt(note.style.top, 10);
-        console.log(`Posición de la nota al presionar: ${notePosition}`);
+    const position = parseInt(note.style.top, 10);
+    console.log('Posición de la nota:', position);
 
-        if (notePosition >= 460 && notePosition <= 500) {
-            console.log('¡Acierto!');
-            note.remove();
-        } if (note.parentElement) note.remove(); // Verificar que la nota exista antes de eliminarla
-        } else if (notePosition < 460) {
-            console.log('Acierto temprano, nota eliminada');
-            if (note.parentElement) note.remove();
-        } else if (notePosition > 500) {
-            console.log('Acierto tardío, nota eliminada');
-            if (note.parentElement) note.remove();
-        }else {
-            console.log('¡Fallo!');
-        }
+    if (position >= 460 && position <= 500) {
+        console.log('¡SICK!');
+        showJudgement('sick');
+        updateScore(300);
+        showHitValue(300);
+        note.remove();
+    } else if (position >= 440 && position < 460) {
+        console.log('¡GOOD!');
+        showJudgement('good');
+        updateScore(100);
+        showHitValue(100);
+        note.remove();
+    } else if (position >= 400 && position < 440) {
+        console.log('¡BAD!');
+        showJudgement('bad');
+        updateScore(50);
+        showHitValue(50);
+        note.remove();
+    } else {
+        console.log('¡SHIT!');
+        showJudgement('shit');
+        showHitValue(0);
+        if (note.parentElement) note.remove();
     }
-);
+});
+
+function openDatabase() {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open('OsuGameDB', 1);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains('audioFiles')) {
+                db.createObjectStore('audioFiles', { keyPath: 'id' });
+            }
+        };
+
+        request.onsuccess = (event) => resolve(event.target.result);
+        request.onerror = (event) => reject(event.target.error);
+    });
+}
+
+function saveToIndexedDB(storeName, id, data) {
+    return openDatabase().then((db) => {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readwrite');
+            const store = transaction.objectStore(storeName);
+            store.put({ id, data });
+
+            transaction.oncomplete = () => resolve();
+            transaction.onerror = (event) => reject(event.target.error);
+        });
+    });
+}
+
+function getFromIndexedDB(storeName, id) {
+    return openDatabase().then((db) => {
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction(storeName, 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.get(id);
+
+            request.onsuccess = () => resolve(request.result ? request.result.data : null);
+            request.onerror = (event) => reject(event.target.error);
+        });
+    });
+}

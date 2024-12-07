@@ -1,35 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seleccionar Archivo</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .difficulty-buttons {
-            margin-top: 20px;
-        }
-        .difficulty-buttons button {
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+    <title>Selección de Beatmap</title>
+    <link rel="stylesheet" href="./dificultad.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
-    <h1>Selecciona tu archivo .osz</h1>
-    <input type="file" id="fileInput" accept=".osz">
-    <h2>Dificultades</h2>
+    <div class="container">
+        <h1>Selecciona una canción</h1>
+        
+        <!-- Lista de canciones -->
+        <div class="song-list">
+            <!-- Las canciones se cargarán aquí dinámicamente -->
+        </div>
 
-    
-    <div id="difficultyContainer"></div>
+        <!-- Contenedor para las dificultades -->
+        <div id="difficultyContainer"></div>
+    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="./changeDificult.js"></script>
 </body>
 </html>

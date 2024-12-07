@@ -13,6 +13,7 @@
 
     <h1>Osu!Mania con Efecto de Corte</h1>
     <div class="container">
+        <div id="scoreDisplay">0</div>
         <div class="game-container">
             <div class="column" data-key="d" data-direction="left">
                 <div class="hit-zone"></div>
@@ -27,11 +28,12 @@
                 <div class="hit-zone"></div>
             </div>
         </div>
+        <div id="judgementDisplay"></div>
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-    <script src="./game.js"></script>
+    <script type="module" src="./game.js"></script>
 
 </body>
 </html>

@@ -1,104 +1,204 @@
-document.getElementById('fileInput').addEventListener('change', async (e) => {
-    const file = e.target.files[0];
-    if (file && file.name.endsWith('.osz')) {
-        console.log('Cargando archivo .osz...');
-        await loadOsz(file);  // Cargar el archivo .osz
-    } else {
-        alert('Por favor selecciona un archivo .osz válido.');
+// Esperar a que el DOM esté completamente cargado
+window.addEventListener('load', () => {
+    // Canciones predeterminadas
+    const defaultSongs = [
+        {
+            id: '347765',
+            title: 'Racemization',
+            artist: 'Camellia',
+            oszFile: '347765 Camellia - Racemization.osz'
+        },
+        {
+            id: '902215',
+            title: 'SLOW DANCING IN THE DARK',
+            artist: 'Joji',
+            oszFile: '902215 Joji - SLOW DANCING IN THE DARK.osz'
+        },
+        {
+            id: '1514399',
+            title: 'Ugh',
+            artist: 'Kawai Sprite',
+            oszFile: '1514399 Kawai Sprite - Ugh (1).osz'
+        }
+    ];
+
+    // Función para procesar el archivo .osz
+    async function processOszFile(file) {
+        try {
+            const zip = new JSZip();
+            const contents = await zip.loadAsync(file);
+            
+            let osuFiles = [];
+            let audioFile = null;
+
+            // Buscar archivos .osu y audio
+            for (let filename in contents.files) {
+                if (filename.endsWith('.osu')) {
+                    const content = await contents.files[filename].async('string');
+                    osuFiles.push({
+                        filename: filename,
+                        content: content
+                    });
+                }
+                if (filename.toLowerCase().endsWith('.mp3') || filename.toLowerCase().endsWith('.ogg')) {
+                    audioFile = await contents.files[filename].async('blob');
+                }
+            }
+
+            if (osuFiles.length === 0) {
+                throw new Error('No se encontraron archivos .osu');
+            }
+
+            // Guardar el audio
+            if (audioFile) {
+                await saveToIndexedDB('audioFiles', 'currentAudio', audioFile);
+            }
+
+            // Procesar las dificultades
+            const difficulties = osuFiles.map(osuFile => {
+                const diffInfo = parseDifficultyInfo(osuFile.content);
+                return {
+                    ...diffInfo,
+                    filename: osuFile.filename,
+                    content: osuFile.content
+                };
+            });
+
+            // Mostrar las dificultades
+            displayDifficulties(difficulties);
+
+        } catch (error) {
+            console.error('Error al procesar el archivo:', error);
+            alert('Error al procesar el archivo .osz');
+        }
     }
-});
 
-// Cargar y procesar el archivo .osz
-async function loadOsz(file) {
-    const zip = new JSZip();
-    const contents = await zip.loadAsync(file); // Descomprimir el archivo .osz
-
-    let osuFile = null;
-    let audioFile = null;
-
-    // Buscar archivos .osu y el archivo de audio en el .osz
-    Object.keys(contents.files).forEach((filename) => {
-        if (filename.endsWith('.osu')) osuFile = contents.files[filename]; // Archivo del mapa
-        if (filename.toLowerCase() === 'audio.mp3') audioFile = contents.files[filename]; // Archivo de audio        console.log(audioFile);
-    });
-
-    if (!osuFile || !audioFile) {
-        console.error('El archivo .osz no contiene mapa o audio válidos.');
-        alert('No se encontró mapa o audio en el archivo .osz');
-        return;
-    }
-
-    // Procesar el archivo .osu
-    const osuText = await osuFile.async('string');
-    console.log('Contenido del archivo .osu:', osuText); // Verificar en consola
-
-    const difficulties = parseDifficulties(osuText); // Extraer todas las secciones de dificultad
-
-    //Procesar el archivo de audio
-    try {
-        
-        const audioBlob = await audioFile.async('base64'); // Convertir audio a Base64
-        const audioBase64 = `data:audio/mp3;base64,${audioBlob}`;
-
-        sessionStorage.setItem('audioData', audioBase64); // Guardar el audio en Base64
-        sessionStorage.setItem('osuContent', osuText);
-        
-        console.log('Mapa y audio cargados.');
-    } catch (error) {
-        console.error('Error al intentar cargar el archivo de audio:', error);
-        alert('Error al intentar cargar el archivo de audio');
-    }
-
-    // Mostrar las dificultades
-    displayDifficulties(difficulties);
-}
-
-// Extraer todas las secciones de dificultad del archivo .osu
-function parseDifficulties(osuText) {
-    const difficulties = [];
-    const difficultyRegex = /\[Difficulty\](.*?)\[.*?\]/gs; // Hacer que la regex sea más robusta
-
-    let match;
-    
-    // Buscar todas las secciones de dificultad en el archivo .osu
-    while ((match = difficultyRegex.exec(osuText)) !== null) {
-        const section = match[1].trim(); // Contenido de la sección [Difficulty]
-        difficulties.push(section); // Añadir la sección completa
-    }
-
-    console.log("Dificultades extraídas:", difficulties); // Verificar en consola
-    return difficulties;
-}
-
-// Mostrar las dificultades al usuario
-function displayDifficulties(difficulties) {
-    const difficultyContainer = document.getElementById('difficultyContainer');
-    if (difficultyContainer) {
-        difficultyContainer.innerHTML = ''; // Limpiar el contenedor
-
-        difficulties.forEach((difficulty, index) => {
-            const difficultyButton = document.createElement('button');
-            difficultyButton.textContent = `Dificultad ${index + 1}: ${difficulty}`;
-            difficultyButton.addEventListener('click', () => selectDifficulty(difficulty));
-            difficultyContainer.appendChild(difficultyButton);
+    // Función para guardar en IndexedDB
+    async function saveToIndexedDB(storeName, key, value) {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('gameDB', 1);
+            
+            request.onerror = () => reject(request.error);
+            request.onsuccess = () => {
+                const db = request.result;
+                const tx = db.transaction(storeName, 'readwrite');
+                const store = tx.objectStore(storeName);
+                
+                store.put(value, key);
+                
+                tx.oncomplete = () => resolve();
+                tx.onerror = () => reject(tx.error);
+            };
+            
+            request.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(storeName)) {
+                    db.createObjectStore(storeName);
+                }
+            };
         });
-    } else {
-        console.error('No se encontró el contenedor de dificultades.');
     }
-}
 
-// Manejar la selección de una dificultad
-function selectDifficulty(difficulty) {
-    const audioData = sessionStorage.getItem('audioUrl');
-    console.log(audioData);
+    // Función para parsear la información de dificultad
+    function parseDifficultyInfo(osuContent) {
+        const info = {
+            version: 'Unknown Difficulty',
+            approachRate: 0,
+            circleSize: 0,
+            hpDrain: 0
+        };
 
-    // if (!audioData) {
-    //     alert('No se cargó un archivo de audio. Volviendo a la página principal.');
-    //     window.location.href = 'select.html';
-    //     return;
-    // }
+        const lines = osuContent.split('\n');
+        for (const line of lines) {
+            if (line.startsWith('Version:')) {
+                info.version = line.split(':')[1].trim();
+            }
+            if (line.startsWith('ApproachRate:')) {
+                info.approachRate = parseFloat(line.split(':')[1]);
+            }
+            if (line.startsWith('CircleSize:')) {
+                info.circleSize = parseFloat(line.split(':')[1]);
+            }
+            if (line.startsWith('HPDrainRate:')) {
+                info.hpDrain = parseFloat(line.split(':')[1]);
+            }
+        }
 
-    sessionStorage.setItem('selectedDifficulty', difficulty); // Guardar la dificultad seleccionada
-    console.log(`Dificultad seleccionada: ${difficulty}`);
-    window.location.href = 'game.html'; // Redirigir a la página del juego
-}
+        return info;
+    }
+
+    // Función para mostrar las dificultades
+    function displayDifficulties(difficulties) {
+        const difficultyContainer = document.getElementById('difficultyContainer');
+        if (!difficultyContainer) return;
+
+        difficultyContainer.innerHTML = `
+            <h2>Selecciona una dificultad</h2>
+            <div class="difficulty-list">
+                ${difficulties.map((diff, index) => `
+                    <div class="difficulty-card" data-index="${index}">
+                        <h3>${diff.version}</h3>
+                        <p>AR: ${diff.approachRate} | CS: ${diff.circleSize} | HP: ${diff.hpDrain}</p>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        const difficultyCards = difficultyContainer.querySelectorAll('.difficulty-card');
+        difficultyCards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                const selectedDiff = difficulties[index];
+                sessionStorage.setItem('selectedDifficulty', JSON.stringify({
+                    version: selectedDiff.version,
+                    approachRate: selectedDiff.approachRate,
+                    circleSize: selectedDiff.circleSize,
+                    hpDrain: selectedDiff.hpDrain
+                }));
+                sessionStorage.setItem('osuContent', selectedDiff.content);
+                window.location.href = 'game.html';
+            });
+        });
+    }
+
+    // Función para cargar un archivo .osz
+    async function loadDefaultSong(oszFile) {
+        try {
+            const response = await fetch(`./assets/songs/${oszFile}`);
+            if (!response.ok) {
+                throw new Error(`No se pudo cargar el archivo: ${oszFile}`);
+            }
+            const blob = await response.blob();
+            await processOszFile(new File([blob], oszFile));
+        } catch (error) {
+            console.error('Error al cargar la canción:', error);
+            alert(`Error al cargar la canción: ${oszFile}`);
+        }
+    }
+
+    // Función para cargar la lista de canciones
+    function loadSongList() {
+        const songList = document.querySelector('.song-list');
+        if (!songList) {
+            console.error('No se encontró el elemento .song-list');
+            return;
+        }
+
+        songList.innerHTML = '';
+        defaultSongs.forEach(song => {
+            const songCard = document.createElement('div');
+            songCard.className = 'song-card';
+            songCard.innerHTML = `
+                <div class="song-info">
+                    <h3>${song.title}</h3>
+                    <p>${song.artist}</p>
+                </div>
+            `;
+            
+            songCard.addEventListener('click', () => loadDefaultSong(song.oszFile));
+            songList.appendChild(songCard);
+        });
+    }
+
+    // Inicializar la lista de canciones
+    loadSongList();
+});
