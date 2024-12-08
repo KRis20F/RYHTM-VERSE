@@ -35,21 +35,18 @@ class SkinManager {
         };
 
         try {
-            // Cargar juicios
             for (const [key, path] of Object.entries(this.defaultSkin.judgements)) {
                 const response = await fetch(path);
                 const blob = await response.blob();
                 this.skinElements.judgements[key] = await createImageBitmap(blob);
             }
 
-            // Cargar números
             for (const path of this.defaultSkin.numbers) {
                 const response = await fetch(path);
                 const blob = await response.blob();
                 this.skinElements.numbers.push(await createImageBitmap(blob));
             }
 
-            // Cargar menú
             for (const [key, path] of Object.entries(this.defaultSkin.menu)) {
                 const response = await fetch(path);
                 const blob = await response.blob();

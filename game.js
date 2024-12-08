@@ -1,44 +1,112 @@
 import { skinManager } from './skinManager.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const selectedDifficulty = JSON.parse(sessionStorage.getItem('selectedDifficulty'));
-    const osuContent = sessionStorage.getItem('osuContent');
-    const audioBlob = await getFromIndexedDB('audioFiles', 'currentAudio');
+    try {
+        console.log('Iniciando carga del juego...');
+        
+        
+        const osuContent = sessionStorage.getItem('osuContent');
+        console.log('¿Hay contenido OSU?:', !!osuContent);
+        
+        if (!osuContent) {
+            throw new Error('No hay contenido OSU en sessionStorage');
+        }
 
-    if (!audioBlob) {
-        alert('No se encontró el archivo de audio. Volviendo a la página principal.');
+        
+        console.log('Intentando cargar el audio...');
+        const audioBlob = await getAudioBlob();
+        console.log('¿Se obtuvo el audioBlob?:', !!audioBlob);
+        
+        if (!audioBlob) {
+            throw new Error('No se pudo obtener el audio de IndexedDB');
+        }
+
+        const audioUrl = URL.createObjectURL(audioBlob);
+        const audio = new Audio(audioUrl);
+        
+        console.log('Audio creado, configurando eventos...');
+
+        
+        const difficultyLabel = document.getElementById('difficultyLabel');
+        if (difficultyLabel) {
+            difficultyLabel.textContent = 'DIFICULTAD: LEGEND';
+        }
+
+        audio.addEventListener('canplay', () => {
+            console.log('Audio listo para reproducir');
+            const hitObjects = parseOsuMap(osuContent);
+            console.log('Objetos parseados:', hitObjects.length);
+            audio.play();
+            startGame(hitObjects, audio);
+        });
+
+        audio.addEventListener('error', (e) => {
+            console.error('Error específico del audio:', e.target.error);
+            throw new Error(`Error al cargar el audio: ${e.target.error.message}`);
+        });
+
+    } catch (error) {
+        console.error('Error detallado al iniciar el juego:', error);
+        console.error('Stack trace:', error.stack);
+        alert('Error al cargar el juego. Volviendo a la selección.');
         window.location.href = 'select.html';
-        return;
     }
-
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = new Audio(audioUrl);
-
-    // Validar que los datos necesarios estén presentes
-    if (!selectedDifficulty || !osuContent || !audioBlob) {
-        alert('Por favor, selecciona una dificultad primero.');
-        window.location.href = 'select.html';
-        return;
-    }
-
-    document.getElementById('difficultyLabel').textContent = `Dificultad: ${selectedDifficulty.title}`;
-
-    // Parsear el archivo .osu para obtener los objetos
-    const hitObjects = parseOsuMap(osuContent);
-
-    // Depurar audio para asegurar que se cargue correctamente
-    audio.addEventListener('canplay', () => {
-        console.log('Audio cargado correctamente. Reproduciendo...');
-        audio.play();
-        startGame(hitObjects, audio);
-    });
-
-    audio.addEventListener('error', () => {
-        console.error('Error al cargar el audio. Verifica que el archivo .mp3 sea válido.');
-    });
 });
 
-// Parsear el archivo .osu para obtener las notas (HitObjects)
+async function getAudioBlob() {
+    try {
+        const request = indexedDB.open('gameDB');
+        
+        return new Promise((resolve, reject) => {
+            request.onerror = () => reject(request.error);
+            
+            request.onsuccess = () => {
+                const db = request.result;
+                const tx = db.transaction('audioFiles', 'readonly');
+                const store = tx.objectStore('audioFiles');
+                
+                const getRequest = store.get('currentAudio');
+                
+                getRequest.onsuccess = () => {
+                    if (getRequest.result) {
+                        resolve(getRequest.result);
+                    } else {
+                        reject(new Error('No se encontró el archivo de audio'));
+                    }
+                };
+                
+                getRequest.onerror = () => reject(getRequest.error);
+            };
+        });
+    } catch (error) {
+        console.error('Error al obtener el audio:', error);
+        throw error;
+    }
+}
+
+function startGame(hitObjects, audio) {
+    console.log('Iniciando juego con', hitObjects.length, 'notas');
+    const columns = document.querySelectorAll('.column');
+
+    const interval = setInterval(() => {
+        const currentTime = audio.currentTime * 1000;
+
+        hitObjects.forEach((hit, index) => {
+            if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
+                console.log(`Generando nota en columna ${hit.column} en tiempo ${currentTime}`);
+                spawnNote(columns[hit.column]);
+                hitObjects.splice(index, 1);
+            }
+        });
+
+        if (!hitObjects.length) {
+            console.log('Todas las notas procesadas');
+            clearInterval(interval);
+        }
+    }, 16);
+}
+
+
 function parseOsuMap(osuText) {
     const lines = osuText.split('\n');
     const hitObjects = [];
@@ -51,7 +119,7 @@ function parseOsuMap(osuText) {
         if (line === '[HitObjects]') {
             console.log("Sección [HitObjects] encontrada.");
             inHitObjectsSection = true;
-            continue; // Saltar esta línea
+            continue; 
         }
         if (line.startsWith('[') && inHitObjectsSection) break;
 
@@ -63,7 +131,7 @@ function parseOsuMap(osuText) {
             }
 
             const [x, , time] = parts.map(Number);
-            const column = Math.floor((x / 512) * 4); // Asumiendo 4 columnas
+            const column = Math.floor((x / 512) * 4); 
             hitObjects.push({ time, column });
         }
     }
@@ -77,36 +145,15 @@ function parseOsuMap(osuText) {
     return hitObjects;
 }
 
-// Iniciar el juego
-function startGame(hitObjects, audio) {
-    const columns = document.querySelectorAll('.column');
-    const interval = setInterval(() => {
-        const currentTime = audio.currentTime * 1000; // Convertir tiempo a milisegundos
-        console.log(`Tiempo actual del audio: ${currentTime}`);
 
-        hitObjects.forEach((hit, index) => {
-            if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
-                spawnNote(columns[hit.column]);
-                hitObjects.splice(index, 1); // Eliminar la nota procesada
-            }
-        });
-
-        if (!hitObjects.length) {
-            console.log("Todas las notas se han procesado.");
-            clearInterval(interval);
-        }
-    }, 10);
-}
-
-// Crear y mover las notas
 function spawnNote(column) {
     const note = document.createElement('div');
     note.classList.add('note');
-    note.style.top = '0px'; // Posición inicial
+    note.style.top = '0px'; 
     column.appendChild(note);
 
     const direction = column.getAttribute('data-direction');
-    note.classList.add(direction);  // Esto agrega 'down', 'up', 'left', o 'right'
+    note.classList.add(direction);  
 
     column.appendChild(note);
 
@@ -115,12 +162,12 @@ function spawnNote(column) {
 
 function moveNoteDown(note) {
     let position = 0;
-    const noteSpeed = 15; // Velocidad de las notas
+    const noteSpeed = 15; 
     const interval = setInterval(() => {
-        position += noteSpeed; // Actualizar la posición de la nota
+        position += noteSpeed; 
         note.style.top = `${position}px`;
 
-        if (position > 540) { // Si la nota sale de la pantalla
+        if (position > 540) { 
             console.log('Nota eliminada: salió de la pantalla.');
             clearInterval(interval);
             note.remove();
@@ -128,30 +175,52 @@ function moveNoteDown(note) {
     }, 20);
 }
 
-// Primero definimos todas las funciones necesarias
+
 function showJudgement(type) {
     console.log('Mostrando judgement:', type);
-    const judgementImage = new Image();
-    judgementImage.src = `./assets/skins/${type}.png`;
-    judgementImage.className = 'judgement';
+    const judgementDisplay = document.getElementById('judgementDisplay');
+    if (!judgementDisplay) {
+        console.error('No se encontró el elemento judgementDisplay');
+        return;
+    }
+
+    const judgement = document.createElement('div');
+    judgement.className = 'judgement';
     
-    // Limpiar judgements anteriores
+    
+    const img = document.createElement('img');
+    img.src = `./assets/skins/${type.toLowerCase()}.png`; 
+    img.style.width = 'auto';  
+    img.style.height = '50px'; 
+    
+    
+    img.onerror = () => {
+        console.warn(`No se pudo cargar la imagen para: ${type}`);
+        judgement.textContent = type.toUpperCase();
+        judgement.style.color = {
+            'sick': '#00ff00',
+            'good': '#ffff00',
+            'bad': '#ff9900',
+            'shit': '#ff0000'
+        }[type.toLowerCase()] || '#ffffff';
+    };
+
+    judgement.appendChild(img);
+    
+    
     judgementDisplay.innerHTML = '';
-    judgementDisplay.appendChild(judgementImage);
+    judgementDisplay.appendChild(judgement);
+    
     
     setTimeout(() => {
-        judgementImage.remove();
+        if (judgement.parentNode === judgementDisplay) {
+            judgement.remove();
+        }
     }, 500);
 }
 
 function updateScoreDisplay(score) {
     const scoreStr = score.toString().padStart(3, '0');
-    const scoreImages = scoreStr.split('').map(num => {
-        const img = new Image();
-        img.src = `./assets/skins/num${num}.png`;
-        return img;
-    });
-    
     const scoreDisplay = document.getElementById('scoreDisplay');
     if (!scoreDisplay) {
         console.error('No se encontró scoreDisplay');
@@ -160,8 +229,22 @@ function updateScoreDisplay(score) {
 
     scoreDisplay.innerHTML = '';
     
-    scoreImages.forEach(img => {
-        scoreDisplay.appendChild(img);
+    scoreStr.split('').forEach(num => {
+        const imgContainer = document.createElement('div');
+        imgContainer.style.display = 'inline-block';
+        
+        const img = document.createElement('img');
+        img.src = `./assets/skins/num${num}.png`;
+        img.style.height = '40px'; 
+        img.style.width = 'auto';
+        
+        img.onerror = () => {
+            console.warn(`No se pudo cargar la imagen del número: ${num}`);
+            imgContainer.textContent = num; 
+        };
+        
+        imgContainer.appendChild(img);
+        scoreDisplay.appendChild(imgContainer);
     });
 }
 
@@ -199,7 +282,7 @@ function showHitValue(value) {
     }
 }
 
-// Luego el evento keydown
+
 document.addEventListener('keydown', (event) => {
     const columns = document.querySelectorAll('.column');
     const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
@@ -212,7 +295,13 @@ document.addEventListener('keydown', (event) => {
     const position = parseInt(note.style.top, 10);
     console.log('Posición de la nota:', position);
 
-    if (position >= 460 && position <= 500) {
+    if (position === 480) {
+        console.log('¡MARVELOUS!');
+        showJudgement('marvelous');
+        updateScore(500);
+        showHitValue(500);
+        note.remove();
+    } else if (position >= 460 && position <= 500) {
         console.log('¡SICK!');
         showJudgement('sick');
         updateScore(300);
@@ -240,12 +329,12 @@ document.addEventListener('keydown', (event) => {
 
 function openDatabase() {
     return new Promise((resolve, reject) => {
-        const request = indexedDB.open('OsuGameDB', 1);
+        const request = indexedDB.open('gameDB', 1);
 
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
             if (!db.objectStoreNames.contains('audioFiles')) {
-                db.createObjectStore('audioFiles', { keyPath: 'id' });
+                db.createObjectStore('audioFiles');
             }
         };
 
@@ -279,3 +368,68 @@ function getFromIndexedDB(storeName, id) {
         });
     });
 }
+
+
+
+
+let consecutiveHits = 0; 
+const maxHits = 5; 
+
+const baseImage = document.getElementById('character-base');
+const fireImage = document.getElementById('character-fire');
+
+// // Función para manejar los aciertos
+function handleHit(isCorrect) {
+    if (isCorrect) {
+        consecutiveHits++;
+        console.log(`Aciertos consecutivos: ${consecutiveHits}`);
+        
+//         
+        if (consecutiveHits === maxHits) {
+            activateFireEffect();
+        }
+    } else {
+        consecutiveHits = 0; 
+        deactivateFireEffect();
+    }
+}
+
+
+function activateFireEffect() {
+    fireImage.classList.add('fire-effect'); 
+    console.log("¡Fuego activado!");
+}
+
+
+function deactivateFireEffect() {
+    fireImage.classList.remove('fire-effect'); 
+    console.log("Fuego desactivado.");
+}
+
+
+const style = document.createElement('style');
+style.textContent = `
+    .judgement {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        font-weight: bold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        z-index: 1000;
+        animation: fadeIn 0.1s ease-in, fadeOut 0.4s ease-out 0.1s;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+

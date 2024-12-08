@@ -1,172 +1,166 @@
-// Esperar a que el DOM esté completamente cargado
 window.addEventListener('load', () => {
-    // Canciones predeterminadas
     const defaultSongs = [
-        {
-            id: '347765',
-            title: 'Racemization',
-            artist: 'Camellia',
-            oszFile: '347765 Camellia - Racemization.osz'
-        },
-        {
-            id: '902215',
-            title: 'SLOW DANCING IN THE DARK',
-            artist: 'Joji',
-            oszFile: '902215 Joji - SLOW DANCING IN THE DARK.osz'
-        },
-        {
-            id: '1514399',
-            title: 'Ugh',
-            artist: 'Kawai Sprite',
-            oszFile: '1514399 Kawai Sprite - Ugh (1).osz'
-        }
+        { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz' },
+        { id: '902215', title: 'SLOW DANCING IN THE DARK', artist: 'Joji', oszFile: '902215 Joji - SLOW DANCING IN THE DARK.osz' },
+        { id: '1514399', title: 'Ugh', artist: 'Kawai Sprite', oszFile: '1514399 Kawai Sprite - Ugh (1).osz' }
     ];
 
-    // Función para procesar el archivo .osz
     async function processOszFile(file) {
         try {
             const zip = new JSZip();
             const contents = await zip.loadAsync(file);
-            
+
             let osuFiles = [];
             let audioFile = null;
 
-            // Buscar archivos .osu y audio
             for (let filename in contents.files) {
                 if (filename.endsWith('.osu')) {
                     const content = await contents.files[filename].async('string');
-                    osuFiles.push({
-                        filename: filename,
-                        content: content
-                    });
+                    osuFiles.push({ filename, content });
                 }
                 if (filename.toLowerCase().endsWith('.mp3') || filename.toLowerCase().endsWith('.ogg')) {
                     audioFile = await contents.files[filename].async('blob');
                 }
             }
 
-            if (osuFiles.length === 0) {
-                throw new Error('No se encontraron archivos .osu');
-            }
+            if (osuFiles.length === 0) throw new Error('No se encontraron archivos .osu');
 
-            // Guardar el audio
             if (audioFile) {
                 await saveToIndexedDB('audioFiles', 'currentAudio', audioFile);
             }
 
-            // Procesar las dificultades
             const difficulties = osuFiles.map(osuFile => {
                 const diffInfo = parseDifficultyInfo(osuFile.content);
-                return {
-                    ...diffInfo,
-                    filename: osuFile.filename,
-                    content: osuFile.content
-                };
+                return { ...diffInfo, filename: osuFile.filename, content: osuFile.content };
             });
 
-            // Mostrar las dificultades
             displayDifficulties(difficulties);
-
         } catch (error) {
             console.error('Error al procesar el archivo:', error);
             alert('Error al procesar el archivo .osz');
         }
     }
 
-    // Función para guardar en IndexedDB
     async function saveToIndexedDB(storeName, key, value) {
         return new Promise((resolve, reject) => {
-            const request = indexedDB.open('gameDB', 1);
+            const checkRequest = indexedDB.open('gameDB');
             
-            request.onerror = () => reject(request.error);
-            request.onsuccess = () => {
-                const db = request.result;
-                const tx = db.transaction(storeName, 'readwrite');
-                const store = tx.objectStore(storeName);
+            checkRequest.onsuccess = () => {
+                const currentVersion = checkRequest.result.version;
+                checkRequest.result.close();
                 
-                store.put(value, key);
-                
-                tx.oncomplete = () => resolve();
-                tx.onerror = () => reject(tx.error);
+                const request = indexedDB.open('gameDB', currentVersion);
+
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const tx = db.transaction(storeName, 'readwrite');
+                    const store = tx.objectStore(storeName);
+
+                    store.put(value, key);
+                    tx.oncomplete = () => resolve();
+                    tx.onerror = () => reject(tx.error);
+                };
+
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        db.createObjectStore(storeName);
+                    }
+                };
             };
-            
-            request.onupgradeneeded = (e) => {
-                const db = e.target.result;
-                if (!db.objectStoreNames.contains(storeName)) {
-                    db.createObjectStore(storeName);
-                }
-            };
+
+            checkRequest.onerror = () => reject(checkRequest.error);
         });
     }
 
-    // Función para parsear la información de dificultad
     function parseDifficultyInfo(osuContent) {
-        const info = {
-            version: 'Unknown Difficulty',
-            approachRate: 0,
-            circleSize: 0,
-            hpDrain: 0
-        };
-
+        const info = { version: 'Unknown Difficulty', approachRate: 0, circleSize: 0, hpDrain: 0 };
         const lines = osuContent.split('\n');
         for (const line of lines) {
-            if (line.startsWith('Version:')) {
-                info.version = line.split(':')[1].trim();
-            }
-            if (line.startsWith('ApproachRate:')) {
-                info.approachRate = parseFloat(line.split(':')[1]);
-            }
-            if (line.startsWith('CircleSize:')) {
-                info.circleSize = parseFloat(line.split(':')[1]);
-            }
-            if (line.startsWith('HPDrainRate:')) {
-                info.hpDrain = parseFloat(line.split(':')[1]);
-            }
+            if (line.startsWith('Version:')) info.version = line.split(':')[1].trim();
+            if (line.startsWith('ApproachRate:')) info.approachRate = parseFloat(line.split(':')[1]);
+            if (line.startsWith('CircleSize:')) info.circleSize = parseFloat(line.split(':')[1]);
+            if (line.startsWith('HPDrainRate:')) info.hpDrain = parseFloat(line.split(':')[1]);
         }
-
         return info;
     }
 
-    // Función para mostrar las dificultades
     function displayDifficulties(difficulties) {
         const difficultyContainer = document.getElementById('difficultyContainer');
         if (!difficultyContainer) return;
 
-        difficultyContainer.innerHTML = `
-            <h2>Selecciona una dificultad</h2>
-            <div class="difficulty-list">
-                ${difficulties.map((diff, index) => `
-                    <div class="difficulty-card" data-index="${index}">
-                        <h3>${diff.version}</h3>
-                        <p>AR: ${diff.approachRate} | CS: ${diff.circleSize} | HP: ${diff.hpDrain}</p>
-                    </div>
-                `).join('')}
-            </div>
-        `;
+        const categories = { easy: [], medium: [], hard: [], legend: [] };
+    
+        difficulties.forEach(diff => {
+            if (diff.approachRate <= 4) categories.easy.push(diff);
+            else if (diff.approachRate <= 5) categories.medium.push(diff);
+            else if (diff.approachRate <= 8) categories.hard.push(diff);
+            else categories.legend.push(diff);
+        });
 
-        const difficultyCards = difficultyContainer.querySelectorAll('.difficulty-card');
-        difficultyCards.forEach((card, index) => {
-            card.addEventListener('click', () => {
-                const selectedDiff = difficulties[index];
-                sessionStorage.setItem('selectedDifficulty', JSON.stringify({
-                    version: selectedDiff.version,
-                    approachRate: selectedDiff.approachRate,
-                    circleSize: selectedDiff.circleSize,
-                    hpDrain: selectedDiff.hpDrain
-                }));
-                sessionStorage.setItem('osuContent', selectedDiff.content);
-                window.location.href = 'game.html';
+        difficultyContainer.innerHTML = '<h2>Selecciona una dificultad</h2>';
+
+        Object.entries(categories).forEach(([key, diffs]) => {
+            if (diffs.length === 0) return; 
+
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'category';
+            
+
+            const categoryTitle = document.createElement('h3');
+            categoryTitle.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${diffs.length})`;
+            categoryDiv.appendChild(categoryTitle);
+
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.className = 'difficulty-buttons';
+
+
+            diffs.forEach(diff => {
+                const button = document.createElement('button');
+                button.className = 'difficulty-button';
+                
+    
+                let difficultyCategory = 'Easy';
+                if (diff.approachRate > 7) difficultyCategory = 'Legend';
+                else if (diff.approachRate > 6) difficultyCategory = 'Hard';
+                else if (diff.approachRate > 4) difficultyCategory = 'Medium';
+                
+    
+                diff.category = difficultyCategory;
+                
+                button.innerHTML = `
+                    <h4>${diff.version}</h4>
+                    <p>AR: ${diff.approachRate} | CS: ${diff.circleSize} | HP: ${diff.hpDrain}</p>
+                `;
+
+                button.addEventListener('click', () => {
+                    selectDifficulty(diff.filename, diff);
+                });
+
+                buttonsDiv.appendChild(button);
             });
+
+            categoryDiv.appendChild(buttonsDiv);
+            difficultyContainer.appendChild(categoryDiv);
         });
     }
 
-    // Función para cargar un archivo .osz
+    function selectDifficulty(filename, diffData) {
+        try {
+            sessionStorage.setItem('difficultyCategory', diffData.category);
+            sessionStorage.setItem('osuContent', diffData.content);
+            window.location.href = 'game.html';
+        } catch (error) {
+            console.error('Error al procesar los datos:', error);
+        }
+    }
+
     async function loadDefaultSong(oszFile) {
         try {
             const response = await fetch(`./assets/songs/${oszFile}`);
-            if (!response.ok) {
-                throw new Error(`No se pudo cargar el archivo: ${oszFile}`);
-            }
+            if (!response.ok) throw new Error(`No se pudo cargar el archivo: ${oszFile}`);
             const blob = await response.blob();
             await processOszFile(new File([blob], oszFile));
         } catch (error) {
@@ -175,7 +169,6 @@ window.addEventListener('load', () => {
         }
     }
 
-    // Función para cargar la lista de canciones
     function loadSongList() {
         const songList = document.querySelector('.song-list');
         if (!songList) {
@@ -187,18 +180,14 @@ window.addEventListener('load', () => {
         defaultSongs.forEach(song => {
             const songCard = document.createElement('div');
             songCard.className = 'song-card';
-            songCard.innerHTML = `
-                <div class="song-info">
-                    <h3>${song.title}</h3>
-                    <p>${song.artist}</p>
-                </div>
-            `;
-            
+            songCard.innerHTML = `<div class="song-info"><h3>${song.title}</h3><p>${song.artist}</p></div>`;
             songCard.addEventListener('click', () => loadDefaultSong(song.oszFile));
             songList.appendChild(songCard);
         });
     }
 
-    // Inicializar la lista de canciones
     loadSongList();
 });
+
+
+
