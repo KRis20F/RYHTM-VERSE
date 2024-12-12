@@ -14,6 +14,7 @@ body {
     box-sizing: border-box;
     color: var(--text-light);
     overflow: hidden;
+    min-height: 100vh;
 }
 
 h1 {
@@ -194,3 +195,4 @@ h1 > img {
     display: flex;align-content: center;
     justify-content: center;
 }
+

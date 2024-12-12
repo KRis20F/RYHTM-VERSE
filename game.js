@@ -29,7 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const difficultyLabel = document.getElementById('difficultyLabel');
         if (difficultyLabel) {
-            difficultyLabel.textContent = 'DIFICULTAD: LEGEND';
+            // Usar la clave correcta que se guarda en sessionStorage
+            const selectedDifficulty = sessionStorage.getItem('difficultyCategory') || 'EASY';
+            difficultyLabel.textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
         }
 
         audio.addEventListener('canplay', () => {
@@ -295,25 +297,30 @@ document.addEventListener('keydown', (event) => {
     const position = parseInt(note.style.top, 10);
     console.log('Posición de la nota:', position);
 
-    if (position === 480) {
+    let isCorrect = false;
+
+    if (position >= 445 && position <= 455) {
         console.log('¡MARVELOUS!');
         showJudgement('marvelous');
         updateScore(500);
         showHitValue(500);
+        isCorrect = true;
         note.remove();
-    } else if (position >= 460 && position <= 500) {
+    } else if (position >= 435 && position <= 465) {
         console.log('¡SICK!');
         showJudgement('sick');
         updateScore(300);
         showHitValue(300);
+        isCorrect = true;
         note.remove();
-    } else if (position >= 440 && position < 460) {
+    } else if (position >= 400 && position <= 485) {
         console.log('¡GOOD!');
         showJudgement('good');
         updateScore(100);
         showHitValue(100);
+        isCorrect = true;
         note.remove();
-    } else if (position >= 400 && position < 440) {
+    } else if (position >= 370 && position <= 505) {
         console.log('¡BAD!');
         showJudgement('bad');
         updateScore(50);
@@ -325,6 +332,8 @@ document.addEventListener('keydown', (event) => {
         showHitValue(0);
         if (note.parentElement) note.remove();
     }
+
+    handleHit(isCorrect);
 });
 
 function openDatabase() {

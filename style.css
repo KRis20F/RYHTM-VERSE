@@ -338,7 +338,7 @@ body {
 
 .hit-zone {
     position: absolute;
-    bottom: 22px;
+    bottom: 50px;
     width: 21px;
     height: 35px;        
     padding: 1.5em;
@@ -514,3 +514,12 @@ body {
 #life-container img {
     animation: fire-life 1s infinite alternate;
 }
+
+@media (width < 900px) {
+    #top {
+        width: 100vh;
+    }
+}
+
+
+

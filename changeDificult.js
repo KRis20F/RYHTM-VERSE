@@ -2,7 +2,10 @@ window.addEventListener('load', () => {
     const defaultSongs = [
         { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz' },
         { id: '902215', title: 'SLOW DANCING IN THE DARK', artist: 'Joji', oszFile: '902215 Joji - SLOW DANCING IN THE DARK.osz' },
-        { id: '1514399', title: 'Ugh', artist: 'Kawai Sprite', oszFile: '1514399 Kawai Sprite - Ugh (1).osz' }
+        { id: '1514399', title: 'Ugh', artist: 'Kawai Sprite', oszFile: '1514399 Kawai Sprite - Ugh (1).osz' },
+        { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz' },
+        { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz'},
+        {id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz'}
     ];
 
     async function processOszFile(file) {
@@ -43,34 +46,40 @@ window.addEventListener('load', () => {
 
     async function saveToIndexedDB(storeName, key, value) {
         return new Promise((resolve, reject) => {
-            const checkRequest = indexedDB.open('gameDB');
+            const deleteRequest = indexedDB.deleteDatabase('gameDB');
             
-            checkRequest.onsuccess = () => {
-                const currentVersion = checkRequest.result.version;
-                checkRequest.result.close();
-                
-                const request = indexedDB.open('gameDB', currentVersion);
+            deleteRequest.onsuccess = () => {
+                const request = indexedDB.open('gameDB', 1);
 
                 request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    const db = request.result;
-                    const tx = db.transaction(storeName, 'readwrite');
-                    const store = tx.objectStore(storeName);
-
-                    store.put(value, key);
-                    tx.oncomplete = () => resolve();
-                    tx.onerror = () => reject(tx.error);
-                };
 
                 request.onupgradeneeded = (e) => {
                     const db = e.target.result;
-                    if (!db.objectStoreNames.contains(storeName)) {
-                        db.createObjectStore(storeName);
+                    db.createObjectStore(storeName);
+                };
+
+                request.onsuccess = () => {
+                    const db = request.result;
+                    try {
+                        const tx = db.transaction(storeName, 'readwrite');
+                        const store = tx.objectStore(storeName);
+                        const putRequest = store.put(value, key);
+
+                        putRequest.onsuccess = () => {
+                            tx.oncomplete = () => {
+                                db.close();
+                                resolve();
+                            };
+                        };
+
+                        putRequest.onerror = () => reject(putRequest.error);
+                    } catch (error) {
+                        reject(error);
                     }
                 };
             };
 
-            checkRequest.onerror = () => reject(checkRequest.error);
+            deleteRequest.onerror = () => reject(deleteRequest.error);
         });
     }
 
@@ -123,7 +132,7 @@ window.addEventListener('load', () => {
                 
     
                 let difficultyCategory = 'Easy';
-                if (diff.approachRate > 7) difficultyCategory = 'Legend';
+                if (diff.approachRate > 8.5) difficultyCategory = 'Legend';
                 else if (diff.approachRate > 6) difficultyCategory = 'Hard';
                 else if (diff.approachRate > 4) difficultyCategory = 'Medium';
                 
