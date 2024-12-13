@@ -1,5 +1,7 @@
 import { skinManager } from './skinManager.js';
 
+let interval;
+let audio;
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         console.log('Iniciando carga del juego...');
@@ -22,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
+        audio = new Audio(audioUrl);
         
         console.log('Audio creado, configurando eventos...');
 
@@ -86,11 +88,13 @@ async function getAudioBlob() {
     }
 }
 
+
+
 function startGame(hitObjects, audio) {
     console.log('Iniciando juego con', hitObjects.length, 'notas');
     const columns = document.querySelectorAll('.column');
 
-    const interval = setInterval(() => {
+    interval = setInterval(() => {
         const currentTime = audio.currentTime * 1000;
 
         hitObjects.forEach((hit, index) => {
@@ -334,6 +338,12 @@ document.addEventListener('keydown', (event) => {
     }
 
     handleHit(isCorrect);
+
+    if (!isCorrect) {
+        consecutiveHits = 0; 
+        deactivateFireEffect();
+        loseLife(); 
+    }
 });
 
 function openDatabase() {
@@ -378,6 +388,64 @@ function getFromIndexedDB(storeName, id) {
     });
 }
 
+
+
+
+let lives = 3; 
+
+function loseLife() {
+    if (lives <= 0) return;
+
+    const lifeElement = document.getElementById(`life-${lives}`);
+    if (lifeElement) {
+        lifeElement.classList.add('burn-life'); 
+        setTimeout(() => {
+            lifeElement.style.display = 'none'; 
+        }, 500); 
+    }
+    lives--;
+
+    console.log(`Vidas restantes: ${lives}`);
+    if (lives === 0) {
+        console.log("¡Juego terminado!");
+        endGame(); 
+    }
+}
+
+const lifeStyle = document.createElement('style');
+lifeStyle.textContent = `
+    .burn-life {
+        animation: burn 0.5s ease-in-out forwards;
+    }
+
+    @keyframes burn {
+        from {
+            transform: scale(1);
+            opacity: 1;
+        }
+        to {
+            transform: scale(0.5);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(lifeStyle);
+
+function endGame() {
+    console.log('Función endGame invocada');
+    
+    if (audio) {
+        console.log('Audio pausado');
+        audio.pause(); 
+    }
+    
+    clearInterval(interval); 
+    alert('¡Fin del juego! Intenta de nuevo.');
+    
+    setTimeout(() => {
+        window.location.href = 'index.html'; 
+    }, 300);
+}
 
 
 
