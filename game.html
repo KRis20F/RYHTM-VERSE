@@ -8,53 +8,52 @@
     <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-    <div id="image">
-        <div id="top">
-            <div id="character-container">
-                <img id="character-base" src="./Fondo de “satoru-gojo-de-jujutsu-kaisen-12835 copia” eliminado copia.png" alt="Base Character">
-                <img id="character-fire" src="./Fondo de “satoru-gojo-de-jujutsu-kaisen-12835 copia” eliminado.png" alt="Character with Fire">
-            </div>
-            <div id="life-container">
+    <div class="wrapper">
+        <div id="image" class="container">
+            <div id="top">
+                <div id="character-container">
+                    <img id="character-base" src="./Fondo de “satoru-gojo-de-jujutsu-kaisen-12835 copia” eliminado copia.png" alt="Base Character">
+                    <img id="character-fire" src="./Fondo de “satoru-gojo-de-jujutsu-kaisen-12835 copia” eliminado.png" alt="Character with Fire">
+                </div>
+                <div id="life-container">
+                    
+                    <img id="life-1"  src="./img/vida.png" alt="vida 1">
+                    <img id="life-2"  src="./img/vida.png" alt="vida 2">
+                    <img id="life-3"  src="./img/vida.png" alt="vida 3">
+                </div>
                 
-                <img id="life-1"  src="./img/vida.png" alt="vida 1">
-                <img id="life-2"  src="./img/vida.png" alt="vida 2">
-                <img id="life-3"  src="./img/vida.png" alt="vida 3">
+                <div id="sky"></div>
             </div>
-            <!-- <img src="./RHYTHM-VERSE-8-11-2024-2.png" alt="" class="prueba"> -->
-            
-            <div id="sky"></div>
-        </div>
-
-        <div id="bottom">
-            
-            
-            <div id="ground"></div>
-        </div>
-    </div>
-    <div id="difficultyLabel"></div>
-
-
-    <h1>RHYTHM VERSE</h1>
-    <div class="container">
-        <h2>Score:</h2>
-        <div id="scoreDisplay"><img class="score-img" src="./assets/skins/num0.png" alt="numero 0"></div>
-        <div class="game-container">
-            <div class="column" data-key="d" data-direction="left">
-                <div class="hit-zone"></div>
-            </div>
-            <div class="column" data-key="f" data-direction="down">
-                <div class="hit-zone"></div>
-            </div>
-            <div class="column" data-key="j" data-direction="up">
-                <div class="hit-zone"></div>
-            </div>
-            <div class="column" data-key="k" data-direction="right">
-                <div class="hit-zone"></div>
-            </div>
-        </div>
-        <div id="judgementDisplay"></div>
-    </div>
     
+            <div id="bottom"><div id="ground"></div></div>
+        </div>
+        <h3 id="difficultyLabel"></h3>
+    
+    
+        <h1>RHYTHM VERSE</h1>
+        <div class="container">
+            <div id="scoreDisplay">
+                <h2 class="score-text">Score:</h2>
+            </div>
+            <div class="game-container">
+                <div class="column" data-key="d" data-direction="left">
+                    <div class="hit-zone"></div>
+                </div>
+                <div class="column" data-key="f" data-direction="down">
+                    <div class="hit-zone"></div>
+                </div>
+                <div class="column" data-key="j" data-direction="up">
+                    <div class="hit-zone"></div>
+                </div>
+                <div class="column" data-key="k" data-direction="right">
+                    <div class="hit-zone"></div>
+                </div>
+            </div>
+            <div id="judgementDisplay"></div>
+        </div>
+    
+    </div>
+        
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
     <script type="module" src="./game.js"></script>
