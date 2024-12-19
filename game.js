@@ -443,7 +443,7 @@ function endGame() {
     alert('¡Fin del juego! Intenta de nuevo.');
     
     setTimeout(() => {
-        window.location.href = 'index.html'; 
+        window.location.href = 'endgame.html'; 
     }, 300);
 }
 
