@@ -68,12 +68,24 @@ async function getAudioBlob() {
 
 function startGame(hitObjects, audio) {
     const columns = document.querySelectorAll('.column');
-
+    
+    const preloadNotes = () => {
+        columns.forEach(column => {
+            const dummyNote = document.createElement('div');
+            dummyNote.classList.add('note', column.getAttribute('data-direction'));
+            dummyNote.style.opacity = '0';
+            column.appendChild(dummyNote);
+            setTimeout(() => dummyNote.remove(), 100);
+        });
+    };
+    
+    preloadNotes();
+    
     const ranges = isMobile ? {
-        marvelous: { min: 420, max: 480 },
-        sick: { min: 400, max: 500 },
-        good: { min: 360, max: 520 },
-        bad: { min: 320, max: 560 }
+        marvelous: { min: 320, max: 380 },
+        sick: { min: 300, max: 400 },
+        good: { min: 260, max: 420 },
+        bad: { min: 220, max: 460 }
     } : {
         marvelous: { min: 440, max: 460 },
         sick: { min: 420, max: 480 },
@@ -83,18 +95,19 @@ function startGame(hitObjects, audio) {
 
     interval = setInterval(() => {
         const currentTime = audio.currentTime * 1000;
-
-        hitObjects.forEach((hit, index) => {
-            if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
+        
+        for (let i = hitObjects.length - 1; i >= 0; i--) {
+            const hit = hitObjects[i];
+            if (currentTime >= hit.time - 300 && currentTime <= hit.time + 100) {
                 spawnNote(columns[hit.column]);
-                hitObjects.splice(index, 1);
+                hitObjects.splice(i, 1);
             }
-        });
+        }
 
         if (!hitObjects.length) {
             clearInterval(interval);
         }
-    }, 16);
+    }, 8);
 }
 
 
@@ -136,30 +149,24 @@ function parseOsuMap(osuText) {
 
 function spawnNote(column) {
     const note = document.createElement('div');
-    note.classList.add('note');
-    note.style.top = '0px'; 
+    note.classList.add('note', column.getAttribute('data-direction'));
+    note.style.top = '0px';
     column.appendChild(note);
-
-    const direction = column.getAttribute('data-direction');
-    note.classList.add(direction);  
-
-    column.appendChild(note);
-
     moveNoteDown(note);
 }
 
 function moveNoteDown(note) {
     let position = 0;
-    const noteSpeed = 15; 
+    const noteSpeed = isMobile ? 12 : 6;
     const interval = setInterval(() => {
         position += noteSpeed; 
         note.style.top = `${position}px`;
 
-        if (position > 540) { 
+        if (position > 540) {
             clearInterval(interval);
             note.remove();
         }
-    }, 20);
+    }, 8);
 }
 
 
@@ -592,18 +599,20 @@ document.head.appendChild(comboStyle);
 const mobileStyle = document.createElement('style');
 mobileStyle.textContent = `
     @media (max-width: 780px) {
-        .column {
-            touch-action: none;
-        }
-
-        .game-container {
-            touch-action: none;
+        .hit-zone {
+            width: 40px !important;
+            height: 40px !important;
+            padding: 1em !important;
         }
 
         .note {
             width: 40px !important;
             height: 40px !important;
             left: 10px !important;
+        }
+
+        .game-container {
+            touch-action: none;
         }
     }
 `;

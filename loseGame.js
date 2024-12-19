@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     try {
         console.log('Cargando audio de endgame...');
-        const audio = new Audio('./BRUH MEME SONG - REMIX.m4a'); // Reemplaza con la ruta real del archivo de audio
+        const audio = new Audio('./assets/music/BRUH MEME SONG - REMIX.m4a'); // Reemplaza con la ruta real del archivo de audio
         audio.volume = 0.5; // Ajusta el volumen (opcional)
         audio.play()
             .then(() => {
