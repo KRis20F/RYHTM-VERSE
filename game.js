@@ -1,52 +1,30 @@
 import { skinManager } from './skinManager.js';
 
+const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
 let interval;
 let audio;
+let currentCombo = 0;
+let maxCombo = 0;
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        console.log('Iniciando carga del juego...');
-        
-        
         const osuContent = sessionStorage.getItem('osuContent');
-        console.log('¿Hay contenido OSU?:', !!osuContent);
         
-        if (!osuContent) {
-            throw new Error('No hay contenido OSU en sessionStorage');
-        }
-
-        
-        console.log('Intentando cargar el audio...');
         const audioBlob = await getAudioBlob();
-        console.log('¿Se obtuvo el audioBlob?:', !!audioBlob);
-        
-        if (!audioBlob) {
-            throw new Error('No se pudo obtener el audio de IndexedDB');
-        }
 
         const audioUrl = URL.createObjectURL(audioBlob);
         audio = new Audio(audioUrl);
         
-        console.log('Audio creado, configurando eventos...');
-
-        
         const difficultyLabel = document.getElementById('difficultyLabel');
         if (difficultyLabel) {
-            // Usar la clave correcta que se guarda en sessionStorage
             const selectedDifficulty = sessionStorage.getItem('difficultyCategory') || 'EASY';
             difficultyLabel.textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
         }
 
         audio.addEventListener('canplay', () => {
-            console.log('Audio listo para reproducir');
             const hitObjects = parseOsuMap(osuContent);
-            console.log('Objetos parseados:', hitObjects.length);
             audio.play();
             startGame(hitObjects, audio);
-        });
-
-        audio.addEventListener('error', (e) => {
-            console.error('Error específico del audio:', e.target.error);
-            throw new Error(`Error al cargar el audio: ${e.target.error.message}`);
         });
 
     } catch (error) {
@@ -74,8 +52,6 @@ async function getAudioBlob() {
                 getRequest.onsuccess = () => {
                     if (getRequest.result) {
                         resolve(getRequest.result);
-                    } else {
-                        reject(new Error('No se encontró el archivo de audio'));
                     }
                 };
                 
@@ -91,22 +67,31 @@ async function getAudioBlob() {
 
 
 function startGame(hitObjects, audio) {
-    console.log('Iniciando juego con', hitObjects.length, 'notas');
     const columns = document.querySelectorAll('.column');
+
+    const ranges = isMobile ? {
+        marvelous: { min: 420, max: 480 },
+        sick: { min: 400, max: 500 },
+        good: { min: 360, max: 520 },
+        bad: { min: 320, max: 560 }
+    } : {
+        marvelous: { min: 440, max: 460 },
+        sick: { min: 420, max: 480 },
+        good: { min: 380, max: 420 },
+        bad: { min: 340, max: 380 }
+    };
 
     interval = setInterval(() => {
         const currentTime = audio.currentTime * 1000;
 
         hitObjects.forEach((hit, index) => {
             if (currentTime >= hit.time - 400 && currentTime <= hit.time + 100) {
-                console.log(`Generando nota en columna ${hit.column} en tiempo ${currentTime}`);
                 spawnNote(columns[hit.column]);
                 hitObjects.splice(index, 1);
             }
         });
 
         if (!hitObjects.length) {
-            console.log('Todas las notas procesadas');
             clearInterval(interval);
         }
     }, 16);
@@ -118,21 +103,18 @@ function parseOsuMap(osuText) {
     const hitObjects = [];
     let inHitObjectsSection = false;
 
-    console.log("Procesando el archivo .osu...");
-
     for (let line of lines) {
         line = line.trim();
         if (line === '[HitObjects]') {
-            console.log("Sección [HitObjects] encontrada.");
             inHitObjectsSection = true;
             continue; 
         }
+
         if (line.startsWith('[') && inHitObjectsSection) break;
 
         if (inHitObjectsSection && line) {
             const parts = line.split(',');
             if (parts.length < 3) {
-                console.warn("Línea malformada en [HitObjects]:", line);
                 continue;
             }
 
@@ -174,7 +156,6 @@ function moveNoteDown(note) {
         note.style.top = `${position}px`;
 
         if (position > 540) { 
-            console.log('Nota eliminada: salió de la pantalla.');
             clearInterval(interval);
             note.remove();
         }
@@ -183,12 +164,7 @@ function moveNoteDown(note) {
 
 
 function showJudgement(type) {
-    console.log('Mostrando judgement:', type);
     const judgementDisplay = document.getElementById('judgementDisplay');
-    if (!judgementDisplay) {
-        console.error('No se encontró el elemento judgementDisplay');
-        return;
-    }
 
     const judgement = document.createElement('div');
     judgement.className = 'judgement';
@@ -201,7 +177,6 @@ function showJudgement(type) {
     
     
     img.onerror = () => {
-        console.warn(`No se pudo cargar la imagen para: ${type}`);
         judgement.textContent = type.toUpperCase();
         judgement.style.color = {
             'sick': '#00ff00',
@@ -233,7 +208,17 @@ function updateScoreDisplay(score) {
         return;
     }
 
-    scoreDisplay.innerHTML = '';
+    if (!scoreDisplay.querySelector('.score-numbers')) {
+        const numbersContainer = document.createElement('div');
+        numbersContainer.className = 'score-numbers';
+        numbersContainer.style.display = 'inline-flex';
+        numbersContainer.style.marginLeft = '175px';
+        numbersContainer.style.marginTop = '30px';
+        scoreDisplay.appendChild(numbersContainer);
+    }
+
+    const numbersContainer = scoreDisplay.querySelector('.score-numbers');
+    numbersContainer.innerHTML = '';
     
     scoreStr.split('').forEach(num => {
         const imgContainer = document.createElement('div');
@@ -245,12 +230,11 @@ function updateScoreDisplay(score) {
         img.style.width = 'auto';
         
         img.onerror = () => {
-            console.warn(`No se pudo cargar la imagen del número: ${num}`);
             imgContainer.textContent = num; 
         };
         
         imgContainer.appendChild(img);
-        scoreDisplay.appendChild(imgContainer);
+        numbersContainer.appendChild(imgContainer);
     });
 }
 
@@ -277,8 +261,8 @@ function showHitValue(value) {
     
     const judgementDisplay = document.getElementById('judgementDisplay');
     if (judgementDisplay) {
-        hitValueDisplay.style.top = '60%';
-        hitValueDisplay.style.left = '50%';
+        hitValueDisplay.style.top = '55%';
+        hitValueDisplay.style.left = '40%';
         hitValueDisplay.style.transform = 'translate(-50%, -50%)';
         judgementDisplay.appendChild(hitValueDisplay);
         
@@ -289,62 +273,85 @@ function showHitValue(value) {
 }
 
 
-document.addEventListener('keydown', (event) => {
-    const columns = document.querySelectorAll('.column');
-    const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
-    
-    if (!column) return;
-    
+function handleInput(column) {
     const note = column.querySelector('.note');
     if (!note) return;
 
     const position = parseInt(note.style.top, 10);
-    console.log('Posición de la nota:', position);
-
     let isCorrect = false;
 
-    if (position >= 445 && position <= 455) {
-        console.log('¡MARVELOUS!');
+    const ranges = isMobile ? {
+        marvelous: { min: 420, max: 480 },
+        sick: { min: 400, max: 500 },
+        good: { min: 360, max: 520 },
+        bad: { min: 320, max: 560 }
+    } : {
+        marvelous: { min: 440, max: 460 },
+        sick: { min: 420, max: 480 },
+        good: { min: 380, max: 420 },
+        bad: { min: 340, max: 380 }
+    };
+
+    if (position >= ranges.marvelous.min && position <= ranges.marvelous.max) {
         showJudgement('marvelous');
         updateScore(500);
         showHitValue(500);
         isCorrect = true;
-        note.remove();
-    } else if (position >= 435 && position <= 465) {
-        console.log('¡SICK!');
+    } else if (position >= ranges.sick.min && position <= ranges.sick.max) {
         showJudgement('sick');
         updateScore(300);
         showHitValue(300);
         isCorrect = true;
-        note.remove();
-    } else if (position >= 400 && position <= 485) {
-        console.log('¡GOOD!');
+    } else if (position >= ranges.good.min && position <= ranges.good.max) {
         showJudgement('good');
         updateScore(100);
         showHitValue(100);
         isCorrect = true;
-        note.remove();
-    } else if (position >= 370 && position <= 505) {
-        console.log('¡BAD!');
+    } else if (position >= ranges.bad.min && position <= ranges.bad.max) {
         showJudgement('bad');
         updateScore(50);
         showHitValue(50);
-        note.remove();
+        isCorrect = true;
     } else {
-        console.log('¡SHIT!');
         showJudgement('shit');
         showHitValue(0);
-        if (note.parentElement) note.remove();
+        currentCombo = 0;
     }
 
+    if (isCorrect) {
+        currentCombo++;
+        maxCombo = Math.max(maxCombo, currentCombo);
+        note.remove();
+    } else if (note.parentElement) {
+        note.remove();
+    }
+
+    updateComboDisplay();
     handleHit(isCorrect);
 
     if (!isCorrect) {
-        consecutiveHits = 0; 
+        consecutiveHits = 0;
         deactivateFireEffect();
-        loseLife(); 
+        loseLife();
     }
-});
+}
+
+if (isMobile) {
+    const columns = document.querySelectorAll('.column');
+    columns.forEach(column => {
+        column.addEventListener('touchstart', (event) => {
+            event.preventDefault();
+            handleInput(column);
+        });
+    });
+} else {
+    document.addEventListener('keydown', (event) => {
+        const columns = document.querySelectorAll('.column');
+        const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
+        if (!column) return;
+        handleInput(column);
+    });
+}
 
 function openDatabase() {
     return new Promise((resolve, reject) => {
@@ -403,11 +410,10 @@ function loseLife() {
             lifeElement.style.display = 'none'; 
         }, 500); 
     }
+
     lives--;
 
-    console.log(`Vidas restantes: ${lives}`);
     if (lives === 0) {
-        console.log("¡Juego terminado!");
         endGame(); 
     }
 }
@@ -432,15 +438,12 @@ lifeStyle.textContent = `
 document.head.appendChild(lifeStyle);
 
 function endGame() {
-    console.log('Función endGame invocada');
     
     if (audio) {
-        console.log('Audio pausado');
         audio.pause(); 
     }
     
     clearInterval(interval); 
-    alert('¡Fin del juego! Intenta de nuevo.');
     
     setTimeout(() => {
         window.location.href = 'endgame.html'; 
@@ -459,9 +462,7 @@ const fireImage = document.getElementById('character-fire');
 function handleHit(isCorrect) {
     if (isCorrect) {
         consecutiveHits++;
-        console.log(`Aciertos consecutivos: ${consecutiveHits}`);
-        
-//         
+
         if (consecutiveHits === maxHits) {
             activateFireEffect();
         }
@@ -472,16 +473,10 @@ function handleHit(isCorrect) {
 }
 
 
-function activateFireEffect() {
-    fireImage.classList.add('fire-effect'); 
-    console.log("¡Fuego activado!");
-}
+function activateFireEffect() {fireImage.classList.add('fire-effect'); }
 
 
-function deactivateFireEffect() {
-    fireImage.classList.remove('fire-effect'); 
-    console.log("Fuego desactivado.");
-}
+function deactivateFireEffect() {fireImage.classList.remove('fire-effect'); }
 
 
 const style = document.createElement('style');
@@ -509,4 +504,108 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+function updateComboDisplay() {
+    let comboDisplay = document.getElementById('comboDisplay');
+    if (!comboDisplay) {
+        const comboDiv = document.createElement('div');
+        comboDiv.id = 'comboDisplay';
+        comboDiv.className = 'combo-display';
+        document.body.appendChild(comboDiv);
+        comboDisplay = document.getElementById('comboDisplay');
+    }
+
+    if (currentCombo > 0) {
+        comboDisplay.innerHTML = `
+            <img src="./assets/skins/combo.png" class="combo-text" alt="combo">
+            <div class="combo-numbers"></div>
+        `;
+        
+        const comboNumbers = comboDisplay.querySelector('.combo-numbers');
+        const comboStr = currentCombo.toString();
+        
+        comboStr.split('').forEach(num => {
+            const imgContainer = document.createElement('div');
+            imgContainer.style.display = 'inline-block';
+            
+            const img = document.createElement('img');
+            img.src = `./assets/skins/num${num}.png`;
+            img.style.height = '30px';
+            img.style.width = 'auto';
+            
+            img.onerror = () => {
+                imgContainer.textContent = num;
+            };
+            
+            imgContainer.appendChild(img);
+            comboNumbers.appendChild(imgContainer);
+        });
+        
+        comboDisplay.style.display = 'block';
+        comboDisplay.classList.add('combo-pop');
+        setTimeout(() => comboDisplay.classList.remove('combo-pop'), 100);
+    } else {
+        comboDisplay.style.display = 'none';
+    }
+}
+
+const comboStyle = document.createElement('style');
+comboStyle.textContent = `
+    .combo-display {
+        position: fixed;
+        top: 35%;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: transparent !important;
+        border: transparent !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+    }
+
+    .combo-text {
+        height: 30px;
+        width: auto;
+        margin-bottom: 5px;
+        filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
+                drop-shadow(2px 2px 1px rgb(248, 59, 255));
+    }
+
+    .combo-numbers img {
+        height: 45px !important;
+        filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
+                drop-shadow(2px 2px 1px rgb(248, 59, 255));
+    }
+
+    .combo-pop {
+        animation: comboPop 0.1s ease-out;
+    }
+`;
+document.head.appendChild(comboStyle);
+
+const mobileStyle = document.createElement('style');
+mobileStyle.textContent = `
+    @media (max-width: 780px) {
+        .column {
+            touch-action: none;
+        }
+
+        .game-container {
+            touch-action: none;
+        }
+
+        .note {
+            width: 40px !important;
+            height: 40px !important;
+            left: 10px !important;
+        }
+    }
+`;
+document.head.appendChild(mobileStyle);
 

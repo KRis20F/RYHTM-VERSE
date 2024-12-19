@@ -287,7 +287,7 @@ h2 {
     display: flex;
     justify-content: space-around;
     width: 400px;
-    height: 600px;
+    height: 82%;
     border: 2px solid var(--cyan);
     background-color: rgba(17, 17, 17, 0.9);
     backdrop-filter: blur(5px);
@@ -486,12 +486,6 @@ h2 {
         grid-template-rows: 15% 1fr;
         grid-template-columns: 0;
     }
-/* 
-    #image {
-        
-    } */
-
-    /* #sky {width: 213dvw;} */
 
     .container {
         grid-area: 2 / 2;
