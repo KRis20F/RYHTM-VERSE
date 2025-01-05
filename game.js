@@ -132,7 +132,7 @@ function parseOsuMap(osuText) {
             }
 
             const [x, , time] = parts.map(Number);
-            const column = Math.floor((x / 512) * 4); 
+            const column = Math.min(3, Math.max(0, Math.floor((x / 512) * 4))); 
             hitObjects.push({ time, column });
         }
     }
@@ -157,14 +157,22 @@ function spawnNote(column) {
 
 function moveNoteDown(note) {
     let position = 0;
-    const noteSpeed = isMobile ? 12 : 6;
+    const noteSpeed = isMobile ? 4 : 6;
+    
     const interval = setInterval(() => {
-        position += noteSpeed; 
+        position += noteSpeed;
         note.style.top = `${position}px`;
-
-        if (position > 540) {
-            clearInterval(interval);
-            note.remove();
+        
+        if (isMobile) {
+            if (position > 800) {
+                clearInterval(interval);
+                note.remove();
+            }
+        } else {
+            if (position > 540) {
+                clearInterval(interval);
+                note.remove();
+            }
         }
     }, 8);
 }
@@ -288,10 +296,10 @@ function handleInput(column) {
     let isCorrect = false;
 
     const ranges = isMobile ? {
-        marvelous: { min: 420, max: 480 },
-        sick: { min: 400, max: 500 },
-        good: { min: 360, max: 520 },
-        bad: { min: 320, max: 560 }
+        marvelous: { min: 750, max: 790 },
+        sick: { min: 730, max: 810 },
+        good: { min: 710, max: 830 },
+        bad: { min: 690, max: 850 }
     } : {
         marvelous: { min: 440, max: 460 },
         sick: { min: 420, max: 480 },
@@ -329,34 +337,46 @@ function handleInput(column) {
         currentCombo++;
         maxCombo = Math.max(maxCombo, currentCombo);
         note.remove();
-    } else if (note.parentElement) {
-        note.remove();
     }
 
     updateComboDisplay();
     handleHit(isCorrect);
-
-    if (!isCorrect) {
-        consecutiveHits = 0;
-        deactivateFireEffect();
-        loseLife();
-    }
 }
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function(...args) {
+        if (!inThrottle) {
+            func.apply(this, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    };
+}
+
+const throttledHandleInput = throttle(handleInput, 16);
 
 if (isMobile) {
     const columns = document.querySelectorAll('.column');
     columns.forEach(column => {
         column.addEventListener('touchstart', (event) => {
             event.preventDefault();
-            handleInput(column);
-        });
+            throttledHandleInput(column);
+        }, { passive: false });
     });
 } else {
+    const keyMap = {
+        'd': 0,
+        'f': 1,
+        'j': 2,
+        'k': 3
+    };
+
     document.addEventListener('keydown', (event) => {
-        const columns = document.querySelectorAll('.column');
-        const column = Array.from(columns).find(col => col.getAttribute('data-key') === event.key);
-        if (!column) return;
-        handleInput(column);
+        if (event.key in keyMap) {
+            const columns = document.querySelectorAll('.column');
+            throttledHandleInput(columns[keyMap[event.key]]);
+        }
     });
 }
 
@@ -599,17 +619,6 @@ document.head.appendChild(comboStyle);
 const mobileStyle = document.createElement('style');
 mobileStyle.textContent = `
     @media (max-width: 780px) {
-        .hit-zone {
-            width: 40px !important;
-            height: 40px !important;
-            padding: 1em !important;
-        }
-
-        .note {
-            width: 40px !important;
-            height: 40px !important;
-            left: 10px !important;
-        }
 
         .game-container {
             touch-action: none;
@@ -618,3 +627,46 @@ mobileStyle.textContent = `
 `;
 document.head.appendChild(mobileStyle);
 
+if (isMobile) {
+    const columns = document.querySelectorAll('.column');
+    columns.forEach(column => {
+        const hitZone = column.querySelector('.hit-zone');
+        
+        column.addEventListener('touchstart', () => {
+            hitZone.classList.add('pressed');
+        });
+
+        column.addEventListener('touchend', () => {
+            hitZone.classList.remove('pressed');
+        });
+    });
+} else {
+    const keyMap = {
+        'd': 0,
+        'f': 1,
+        'j': 2,
+        'k': 3
+    };
+
+    document.addEventListener('keydown', (event) => {
+        if (event.key in keyMap) {
+            const columns = document.querySelectorAll('.column');
+            const column = columns[keyMap[event.key]];
+            if (column) {
+                const hitZone = column.querySelector('.hit-zone');
+                hitZone.classList.add('pressed');
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (event.key in keyMap) {
+            const columns = document.querySelectorAll('.column');
+            const column = columns[keyMap[event.key]];
+            if (column) {
+                const hitZone = column.querySelector('.hit-zone');
+                hitZone.classList.remove('pressed');
+            }
+        }
+    });
+}

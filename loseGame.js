@@ -1,21 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
     try {
-        console.log('Cargando audio de endgame...');
-        const audio = new Audio('./assets/music/BRUH MEME SONG - REMIX.m4a'); // Reemplaza con la ruta real del archivo de audio
-        audio.volume = 0.5; // Ajusta el volumen (opcional)
-        audio.play()
-            .then(() => {
-                console.log('Audio de fin del juego reproduciéndose correctamente.');
-            })
-            .catch(error => {
-                console.error('Error al reproducir el audio:', error);
-                alert('No se pudo reproducir el audio.');
-            });
+        // Reproducir audio de game over
+        const audio = new Audio('./assets/music/BRUH MEME SONG - REMIX.m4a');
+        audio.volume = 0.5;
+        audio.play().catch(error => console.error('Error al reproducir el audio:', error));
+
+        // Recuperar último puntaje
+        const lastGame = JSON.parse(localStorage.getItem('lastScore'));
+        if (lastGame) {
+            showScorePopup(lastGame.score, lastGame.duration);
+            showHighScores();
+        }
+        
     } catch (error) {
-        console.error('Error general en la reproducción del audio:', error);
+        console.error('Error general:', error);
     }
 });
 
+function showHighScores() {
+    const scores = JSON.parse(localStorage.getItem('gameScores')) || [];
+    
+    // Ordenar puntuaciones de mayor a menor
+    scores.sort((a, b) => b.score - a.score);
+    
+    // Mostrar solo los 5 mejores puntajes
+    const topScores = scores.slice(0, 5);
+    
+    // Crear elemento para mostrar high scores
+    const highScoresDiv = document.createElement('div');
+    highScoresDiv.className = 'high-scores';
+    highScoresDiv.innerHTML = `
+        <h3>Mejores Puntajes</h3>
+        <ul>
+            ${topScores.map(score => `
+                <li>
+                    ${score.score} puntos 
+                    - Combo: ${score.maxCombo}
+                    - ${new Date(score.date).toLocaleDateString()}
+                </li>
+            `).join('')}
+        </ul>
+    `;
+    
+    document.querySelector('.tutorial-content').appendChild(highScoresDiv);
+}
 
 function showScorePopup(score, duration) {
     const popup = document.getElementById('tutorial-popup');
@@ -23,11 +51,9 @@ function showScorePopup(score, duration) {
     const finalDurationElem = document.getElementById('final-duration');
     const classificationElem = document.getElementById('score-classification');
 
-    
     finalScoreElem.textContent = score;
     finalDurationElem.textContent = duration.toFixed(2);
 
-    
     let classification;
     if (score >= 1000) {
         classification = "Master";
@@ -40,30 +66,5 @@ function showScorePopup(score, duration) {
     }
     classificationElem.textContent = classification;
 
-    
     popup.classList.remove('hidden');
-
-    
-    const closeBtn = document.querySelector('.close-score');
-    closeBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        popup.classList.add('hidden');
-        
-        window.location.href = 'index.html'; 
-    });
-}
-
-
-function endGame() {
-    console.log('Función endGame invocada');
-
-    if (audio) {
-        console.log('Audio pausado');
-        audio.pause();
-    }
-
-    clearInterval(interval);
-
-    const duration = audio.currentTime; 
-    showScorePopup(currentScore, duration);
 }

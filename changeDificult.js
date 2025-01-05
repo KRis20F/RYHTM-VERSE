@@ -1,11 +1,14 @@
 window.addEventListener('load', () => {
     const defaultSongs = [
         { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz' },
-        { id: '902215', title: 'SLOW DANCING IN THE DARK', artist: 'Joji', oszFile: '902215 Joji - SLOW DANCING IN THE DARK.osz' },
-        { id: '1514399', title: 'Ugh', artist: 'Kawai Sprite', oszFile: '1514399 Kawai Sprite - Ugh (1).osz' },
         { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz' },
         { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz'},
-        {id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz'}
+        { id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz'},
+        { id: '100649', title:'Viva La Vida',artist: 'Coldplay',oszFile: '100649 Coldplay - Viva La Vida.osz'},
+        { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz'},
+        { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz'},
+        { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz'},
+        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz'}
     ];
 
     async function processOszFile(file) {

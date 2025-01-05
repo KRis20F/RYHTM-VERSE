@@ -10,12 +10,12 @@
     --shadow-secondary: 2px 2px 1px rgb(248, 59, 255);
 }
 
-
 body {
     background: black;
     align-items: center;
     position: relative;
     overflow: hidden;
+    will-change: transform;
 }
 
 .wrapper {
@@ -174,6 +174,7 @@ h2 {
     transform: translate(-50%, -50%);
     z-index: 1000;
     pointer-events: none; 
+    backface-visibility: hidden;
 }
 
 #comboDisplay {
@@ -183,6 +184,7 @@ h2 {
     border-radius: 8px;
     border: 1px solid var(--cyan);
     box-shadow: 0 0 15px var(--magenta);
+    backface-visibility: hidden;
 }
 
 #comboDisplay canvas {
@@ -197,6 +199,7 @@ h2 {
     left: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
+    backface-visibility: hidden;
 }
 
 
@@ -208,6 +211,7 @@ h2 {
     z-index: 1000;
     display: flex;
     justify-content: flex-start;
+    backface-visibility: hidden;
 }
 
 .score-container {
@@ -221,6 +225,7 @@ h2 {
     left: 147px;
     display: flex;
     gap: 2px;
+    backface-visibility: hidden;
 }
 
 .score-img {
@@ -240,6 +245,7 @@ h2 {
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    backface-visibility: hidden;
 }
 
 .judgement img {
@@ -284,8 +290,8 @@ h2 {
 
 
 .game-container {
-    display: flex;
-    justify-content: space-around;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     width: 400px;
     height: 82%;
     border: 2px solid var(--cyan);
@@ -296,6 +302,8 @@ h2 {
     border-radius: 10px;
     margin: 0 auto;
     top: 96px;
+    gap: 5px;
+    will-change: transform;
 }
 
 .column {
@@ -309,31 +317,54 @@ h2 {
 .hit-zone {
     position: absolute;
     bottom: 50px;
-    width: 21px;
-    height: 35px;        
-    padding: 1.5em;
+    left: 11%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    padding: 20px;
     background-image: url('../img/nota-transparente.png');
-    background-size: cover;
+    background-size: contain;
     background-repeat: no-repeat;
-    transition: transform 0.2s ease;
-}
-
-.hit-zone:hover {
-    transform: scale(1.1);
+    background-position: center;
+    z-index: 2;
 }
 
 .note {
-    width: 100%;
-    height: 90px;    
-    text-align: center;
+    width: 90%;
+    height: 80px;
+    
     position: absolute;
+    left: 60%;
+    transform: translateX(-50%);
     background-image: url('../img/nota.png');
     background-repeat: no-repeat;
     background-size: contain;
-    display: flex;
-    left: 20px;
-    margin-inline: 1em;
-    top: -20px; 
+    background-position: center;
+    z-index: 1;
+    will-change: transform, top;
+    transition: transform 0.1s ease-out;
+}
+
+.hit-zone.pressed {
+    transform: scale(0.9);
+    filter: brightness(1.5);
+}
+
+@media (max-width: 780px) {
+    .game-container {
+        width: 100%;
+        height: 70vh;
+        gap: 2px;
+    }
+
+    .column {
+        padding: 0 5px;
+    }
+
+    .hit-zone, .note {
+        width: 50px;
+        height: 50px;
+    }
 }
 
 .column:first-child > .hit-zone {
@@ -371,18 +402,6 @@ h2 {
     transform: translateX(-50%) rotate(358deg);
 }
 
-@media (width < 780px) {
-    .note {
-        width: 40px !important;
-        height: 40px !important;
-        left: 10px !important;
-    }
-}
-
-.hit-value {
-    animation: fadeOut 0.5s forwards;
-}
-
 #scoreDisplay img {
     height: 35px;
     width: auto;
@@ -416,26 +435,20 @@ h2 {
 
 @keyframes fire {
     0% {
-        filter: drop-shadow(0 0 25px rgba(255, 69, 0, 0.8)) 
-                drop-shadow(0 0 20px rgba(255, 0, 0, 0.7));
+        filter: drop-shadow(0 0 25px rgba(255, 69, 0, 0.8));
         transform: scale(1);
-    }
-    50% {
-        filter: drop-shadow(0 0 40px rgba(255, 165, 0, 0.9)) 
-                drop-shadow(0 0 30px rgba(255, 20, 147, 0.7));
-        transform: scale(1.05);
     }
     100% {
-        filter: drop-shadow(0 0 50px rgba(255, 255, 0, 1)) 
-                drop-shadow(0 0 40px rgba(70, 130, 180, 0.8));
-        transform: scale(1);
+        filter: drop-shadow(0 0 50px rgba(255, 255, 0, 1));
+        transform: scale(1.05);
     }
 }
 
 
 #character-fire.fire-effect {
-    animation: fire 1s infinite alternate; 
-    opacity: 1; 
+    animation: fire 1s infinite alternate;
+    opacity: 1;
+    will-change: transform, filter;
 }
 
 
@@ -534,11 +547,34 @@ h2 {
         height: 835px;
     }
 
-    .hit-zone {
-        width: 40px !important;
-        height: 40px !important;
-        padding: 1em !important;
-    }
 
+}
+
+#game-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--cyan);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    will-change: transform;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
