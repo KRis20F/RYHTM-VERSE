@@ -1,0 +1,13 @@
+@use '../abstracts/variables' as vars;
+@use 'sass:map';
+
+body {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  box-sizing: border-box;
+  color: map.get(vars.$colors, text-light);
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 100vh;
+}

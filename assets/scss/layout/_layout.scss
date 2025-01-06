@@ -1,0 +1,35 @@
+@mixin body-styles($page: 'default') {
+  @if $page == 'main-pages' {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-image: url('../img/wallpaperNew.webp');
+    background-size: cover;
+    background-attachment: fixed;
+    color: white;
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  } @else {
+    background: black;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+}
+
+// Aplicar estilos según la clase del body
+body {
+  @include body-styles('default');
+  
+  &.main-page {
+    @include body-styles('main-pages');
+  }
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  z-index: 2;
+} 

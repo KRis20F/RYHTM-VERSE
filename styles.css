@@ -1,9 +1,0 @@
-/* Primero añadimos los estilos para la animación */
-.hit-zone {
-    transition: transform 0.1s ease-out;
-}
-
-.hit-zone.pressed {
-    transform: scale(0.9);
-    filter: brightness(1.5);
-} 

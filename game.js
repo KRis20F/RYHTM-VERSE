@@ -445,25 +445,6 @@ function loseLife() {
     }
 }
 
-const lifeStyle = document.createElement('style');
-lifeStyle.textContent = `
-    .burn-life {
-        animation: burn 0.5s ease-in-out forwards;
-    }
-
-    @keyframes burn {
-        from {
-            transform: scale(1);
-            opacity: 1;
-        }
-        to {
-            transform: scale(0.5);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(lifeStyle);
-
 function endGame() {
     
     if (audio) {
@@ -499,38 +480,10 @@ function handleHit(isCorrect) {
     }
 }
 
-
 function activateFireEffect() {fireImage.classList.add('fire-effect'); }
-
 
 function deactivateFireEffect() {fireImage.classList.remove('fire-effect'); }
 
-
-const style = document.createElement('style');
-style.textContent = `
-    .judgement {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-        font-weight: bold;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        z-index: 1000;
-        animation: fadeIn 0.1s ease-in, fadeOut 0.4s ease-out 0.1s;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-        to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    }
-
-    @keyframes fadeOut {
-        from { opacity: 1; }
-        to { opacity: 0; }
-    }
-`;
-document.head.appendChild(style);
 
 function updateComboDisplay() {
     let comboDisplay = document.getElementById('comboDisplay');
@@ -576,56 +529,6 @@ function updateComboDisplay() {
     }
 }
 
-const comboStyle = document.createElement('style');
-comboStyle.textContent = `
-    .combo-display {
-        position: fixed;
-        top: 35%;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 24px;
-        font-weight: bold;
-        color: white;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background: transparent !important;
-        border: transparent !important;
-        box-shadow: none !important;
-        padding: 0 !important;
-    }
-
-    .combo-text {
-        height: 30px;
-        width: auto;
-        margin-bottom: 5px;
-        filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
-                drop-shadow(2px 2px 1px rgb(248, 59, 255));
-    }
-
-    .combo-numbers img {
-        height: 45px !important;
-        filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
-                drop-shadow(2px 2px 1px rgb(248, 59, 255));
-    }
-
-    .combo-pop {
-        animation: comboPop 0.1s ease-out;
-    }
-`;
-document.head.appendChild(comboStyle);
-
-const mobileStyle = document.createElement('style');
-mobileStyle.textContent = `
-    @media (max-width: 780px) {
-
-        .game-container {
-            touch-action: none;
-        }
-    }
-`;
-document.head.appendChild(mobileStyle);
 
 if (isMobile) {
     const columns = document.querySelectorAll('.column');

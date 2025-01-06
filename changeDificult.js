@@ -103,7 +103,8 @@ window.addEventListener('load', () => {
         if (!difficultyContainer) return;
 
         const categories = { easy: [], medium: [], hard: [], legend: [] };
-    
+        const isLegendUnlocked = localStorage.getItem('legendUnlocked') === 'true';
+        
         difficulties.forEach(diff => {
             if (diff.approachRate <= 4) categories.easy.push(diff);
             else if (diff.approachRate <= 5) categories.medium.push(diff);
@@ -114,41 +115,45 @@ window.addEventListener('load', () => {
         difficultyContainer.innerHTML = '<h2>Selecciona una dificultad</h2>';
 
         Object.entries(categories).forEach(([key, diffs]) => {
-            if (diffs.length === 0) return; 
+            if (diffs.length === 0) return;
 
             const categoryDiv = document.createElement('div');
             categoryDiv.className = 'category';
-            
 
             const categoryTitle = document.createElement('h3');
             categoryTitle.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${diffs.length})`;
+            
+            // Si es legend y está bloqueado, añadir ícono de candado
+            if (key === 'legend' && !isLegendUnlocked) {
+                categoryTitle.innerHTML += ' 🔒';
+                categoryTitle.classList.add('locked');
+            }
+            
             categoryDiv.appendChild(categoryTitle);
-
 
             const buttonsDiv = document.createElement('div');
             buttonsDiv.className = 'difficulty-buttons';
-
 
             diffs.forEach(diff => {
                 const button = document.createElement('button');
                 button.className = 'difficulty-button';
                 
-    
-                let difficultyCategory = 'Easy';
-                if (diff.approachRate > 8.5) difficultyCategory = 'Legend';
-                else if (diff.approachRate > 6) difficultyCategory = 'Hard';
-                else if (diff.approachRate > 4) difficultyCategory = 'Medium';
-                
-    
-                diff.category = difficultyCategory;
-                
+                // Si es una dificultad legend y está bloqueada
+                if (key === 'legend' && !isLegendUnlocked) {
+                    button.classList.add('locked');
+                    button.disabled = true;
+                    button.title = 'Completa una canción en dificultad HARD para desbloquear';
+                }
+
                 button.innerHTML = `
                     <h4>${diff.version}</h4>
                     <p>AR: ${diff.approachRate} | CS: ${diff.circleSize} | HP: ${diff.hpDrain}</p>
                 `;
 
                 button.addEventListener('click', () => {
-                    selectDifficulty(diff.filename, diff);
+                    if (!button.classList.contains('locked')) {
+                        selectDifficulty(diff.filename, diff);
+                    }
                 });
 
                 buttonsDiv.appendChild(button);
@@ -201,5 +206,28 @@ window.addEventListener('load', () => {
     loadSongList();
 });
 
+const difficultyStyles = document.createElement('style');
+difficultyStyles.textContent = `
+    .category h3.locked {
+        color: #666;
+    }
 
+    .difficulty-button.locked {
+        opacity: 0.7;
+        background: #444;
+        cursor: not-allowed;
+        position: relative;
+    }
+
+    .difficulty-button.locked::after {
+        content: '🔒';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 24px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+`;
+document.head.appendChild(difficultyStyles);
 

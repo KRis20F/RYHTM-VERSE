@@ -1,0 +1,58 @@
+.combo-display {
+  position: fixed;
+  top: 35%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+
+  .combo-text {
+    height: 30px;
+    margin-bottom: 5px;
+    filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
+            drop-shadow(2px 2px 1px rgb(248, 59, 255));
+  }
+
+  .combo-numbers img {
+    height: 45px;
+    filter: drop-shadow(2px 2px 1px rgb(78, 7, 92)) 
+            drop-shadow(2px 2px 1px rgb(248, 59, 255));
+  }
+
+  &.combo-pop {
+    animation: comboPop 0.1s ease-out;
+  }
+}
+
+@keyframes comboPop {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -50%) scale(1.2); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+} 
+
+
+#comboDisplay {
+  pointer-events: none;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 15px var(--magenta);
+  backface-visibility: hidden;
+}
+
+#comboDisplay > div {
+  text-align: center;
+}
+
+#comboDisplay canvas {
+  height: 40px; 
+  width: auto;
+  margin-left: 2px;
+}
+
+

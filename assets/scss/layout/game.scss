@@ -1,0 +1,18 @@
+@use '../abstracts/variables' as vars;
+@use '../components/game/backgroundGame';
+@use '../components/game/judgement';
+@use '../components/game/combo';
+@use '../components/game/life';
+@use '../components/game/notes';
+@use '../components/game/containerGame';
+@use '../components/game/score';
+@use '../components/game/character';
+@use '../base/typography';
+
+body {
+    background: black;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+}

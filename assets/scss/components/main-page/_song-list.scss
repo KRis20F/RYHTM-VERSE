@@ -1,0 +1,34 @@
+@use '../../abstracts/variables' as vars;
+@use 'sass:map';
+
+.song-list {
+  margin-top: 20px;
+}
+
+.song-card {
+  background: map.get(vars.$colors, white-transparent-10);
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.2s;
+  position: relative;
+  box-shadow: vars.$neon-shadows;
+  animation: flame-flicker 2s infinite;
+  overflow: hidden;
+
+  &:hover {
+    background: map.get(vars.$colors, white-transparent-20);
+  }
+}
+
+.song-info {
+  h3 {
+    margin: 0 0 5px 0;
+  }
+
+  p {
+    margin: 0;
+    color: map.get(vars.$colors, white-transparent-70);
+  }
+}

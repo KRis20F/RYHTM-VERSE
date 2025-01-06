@@ -1,0 +1,28 @@
+.cyber-fire {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: 150%;
+    left: -50%;
+    background: radial-gradient(circle, rgba(255, 0, 255, 0.7) 0%, transparent 70%);
+    filter: blur(45px);
+    animation: flames 4s infinite ease-in-out;
+  }
+
+  &::after {
+    background: radial-gradient(circle, rgba(0, 255, 255, 0.6) 0%, transparent 80%);
+    animation: flames 5s infinite ease-in-out reverse;
+  }
+} 
