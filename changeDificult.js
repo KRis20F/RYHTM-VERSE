@@ -1,17 +1,17 @@
 window.addEventListener('load', () => {
     const defaultSongs = [
-        { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz' },
-        { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz' },
-        { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz'},
-        { id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz'},
-        { id: '100649', title:'Viva La Vida',artist: 'Coldplay',oszFile: '100649 Coldplay - Viva La Vida.osz'},
-        { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz'},
-        { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz'},
-        { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz'},
-        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz'}
+        { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz', legendUnlocked: false },
+        { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz', legendUnlocked: false },
+        { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz', legendUnlocked: false},
+        { id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz', legendUnlocked: false},
+        { id: '100649', title:'Viva La Vida',artist: 'Coldplay',oszFile: '100649 Coldplay - Viva La Vida.osz', legendUnlocked: false},
+        { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz', legendUnlocked: false},
+        { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz', legendUnlocked: false},
+        { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz', legendUnlocked: false},
+        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz', legendUnlocked: false}
     ];
 
-    async function processOszFile(file) {
+    async function processOszFile(file, songId) {
         try {
             const zip = new JSZip();
             const contents = await zip.loadAsync(file);
@@ -40,7 +40,7 @@ window.addEventListener('load', () => {
                 return { ...diffInfo, filename: osuFile.filename, content: osuFile.content };
             });
 
-            displayDifficulties(difficulties);
+            displayDifficulties(difficulties, songId);
         } catch (error) {
             console.error('Error al procesar el archivo:', error);
             alert('Error al procesar el archivo .osz');
@@ -98,12 +98,13 @@ window.addEventListener('load', () => {
         return info;
     }
 
-    function displayDifficulties(difficulties) {
+    function displayDifficulties(difficulties, songId) {
         const difficultyContainer = document.getElementById('difficultyContainer');
         if (!difficultyContainer) return;
 
         const categories = { easy: [], medium: [], hard: [], legend: [] };
-        const isLegendUnlocked = localStorage.getItem('legendUnlocked') === 'true';
+        const songLegendStatus = JSON.parse(localStorage.getItem('songsLegendStatus')) || {};
+        const isLegendUnlocked = songLegendStatus[songId] === true;
         
         difficulties.forEach(diff => {
             if (diff.approachRate <= 4) categories.easy.push(diff);
@@ -112,7 +113,7 @@ window.addEventListener('load', () => {
             else categories.legend.push(diff);
         });
 
-        difficultyContainer.innerHTML = '<h2>Selecciona una dificultad</h2>';
+        difficultyContainer.innerHTML = '';
 
         Object.entries(categories).forEach(([key, diffs]) => {
             if (diffs.length === 0) return;
@@ -123,7 +124,6 @@ window.addEventListener('load', () => {
             const categoryTitle = document.createElement('h3');
             categoryTitle.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${diffs.length})`;
             
-            // Si es legend y está bloqueado, añadir ícono de candado
             if (key === 'legend' && !isLegendUnlocked) {
                 categoryTitle.innerHTML += ' 🔒';
                 categoryTitle.classList.add('locked');
@@ -138,11 +138,10 @@ window.addEventListener('load', () => {
                 const button = document.createElement('button');
                 button.className = 'difficulty-button';
                 
-                // Si es una dificultad legend y está bloqueada
                 if (key === 'legend' && !isLegendUnlocked) {
                     button.classList.add('locked');
                     button.disabled = true;
-                    button.title = 'Completa una canción en dificultad HARD para desbloquear';
+                    button.title = 'Completa esta canción en dificultad HARD para desbloquear LEGEND';
                 }
 
                 button.innerHTML = `
@@ -152,7 +151,7 @@ window.addEventListener('load', () => {
 
                 button.addEventListener('click', () => {
                     if (!button.classList.contains('locked')) {
-                        selectDifficulty(diff.filename, diff);
+                        selectDifficulty(diff.filename, diff, songId);
                     }
                 });
 
@@ -164,8 +163,9 @@ window.addEventListener('load', () => {
         });
     }
 
-    function selectDifficulty(filename, diffData) {
+    function selectDifficulty(filename, diffData, songId) {
         try {
+            sessionStorage.setItem('currentSongId', songId);
             sessionStorage.setItem('difficultyCategory', diffData.category);
             sessionStorage.setItem('osuContent', diffData.content);
             window.location.href = 'game.html';
@@ -174,60 +174,37 @@ window.addEventListener('load', () => {
         }
     }
 
-    async function loadDefaultSong(oszFile) {
+    async function loadDefaultSong(song) {
         try {
-            const response = await fetch(`./assets/songs/${oszFile}`);
-            if (!response.ok) throw new Error(`No se pudo cargar el archivo: ${oszFile}`);
+            const response = await fetch(`./assets/songs/${song.oszFile}`);
+            if (!response.ok) throw new Error(`No se pudo cargar el archivo: ${song.oszFile}`);
             const blob = await response.blob();
-            await processOszFile(new File([blob], oszFile));
+            await processOszFile(new File([blob], song.oszFile), song.id);
         } catch (error) {
             console.error('Error al cargar la canción:', error);
-            alert(`Error al cargar la canción: ${oszFile}`);
+            alert(`Error al cargar la canción: ${song.oszFile}`);
         }
     }
 
     function loadSongList() {
         const songList = document.querySelector('.song-list');
-        if (!songList) {
-            console.error('No se encontró el elemento .song-list');
-            return;
-        }
+        if (!songList) return;
 
         songList.innerHTML = '';
         defaultSongs.forEach(song => {
             const songCard = document.createElement('div');
             songCard.className = 'song-card';
-            songCard.innerHTML = `<div class="song-info"><h3>${song.title}</h3><p>${song.artist}</p></div>`;
-            songCard.addEventListener('click', () => loadDefaultSong(song.oszFile));
+            songCard.innerHTML = `
+                <div class="song-info">
+                    <h3>${song.title}</h3>
+                    <p>${song.artist}</p>
+                </div>
+            `;
+            songCard.addEventListener('click', () => loadDefaultSong(song));
             songList.appendChild(songCard);
         });
     }
 
     loadSongList();
 });
-
-const difficultyStyles = document.createElement('style');
-difficultyStyles.textContent = `
-    .category h3.locked {
-        color: #666;
-    }
-
-    .difficulty-button.locked {
-        opacity: 0.7;
-        background: #444;
-        cursor: not-allowed;
-        position: relative;
-    }
-
-    .difficulty-button.locked::after {
-        content: '🔒';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 24px;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-`;
-document.head.appendChild(difficultyStyles);
 

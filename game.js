@@ -17,8 +17,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const difficultyLabel = document.getElementById('difficultyLabel');
         if (difficultyLabel) {
-            const selectedDifficulty = sessionStorage.getItem('difficultyCategory') || 'EASY';
-            difficultyLabel.textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
+            const difficulty = getDifficultyFromContent(osuContent);
+            difficultyLabel.textContent = `DIFICULTAD: ${difficulty}`;
         }
 
         audio.addEventListener('canplay', () => {
@@ -64,35 +64,9 @@ async function getAudioBlob() {
     }
 }
 
-
-
 function startGame(hitObjects, audio) {
     const columns = document.querySelectorAll('.column');
     
-    const preloadNotes = () => {
-        columns.forEach(column => {
-            const dummyNote = document.createElement('div');
-            dummyNote.classList.add('note', column.getAttribute('data-direction'));
-            dummyNote.style.opacity = '0';
-            column.appendChild(dummyNote);
-            setTimeout(() => dummyNote.remove(), 100);
-        });
-    };
-    
-    preloadNotes();
-    
-    const ranges = isMobile ? {
-        marvelous: { min: 320, max: 380 },
-        sick: { min: 300, max: 400 },
-        good: { min: 260, max: 420 },
-        bad: { min: 220, max: 460 }
-    } : {
-        marvelous: { min: 440, max: 460 },
-        sick: { min: 420, max: 480 },
-        good: { min: 380, max: 420 },
-        bad: { min: 340, max: 380 }
-    };
-
     interval = setInterval(() => {
         const currentTime = audio.currentTime * 1000;
         
@@ -103,11 +77,12 @@ function startGame(hitObjects, audio) {
                 hitObjects.splice(i, 1);
             }
         }
-
-        if (!hitObjects.length) {
-            clearInterval(interval);
-        }
     }, 8);
+
+    audio.addEventListener('ended', () => {
+        clearInterval(interval);
+        endGame(true);
+    });
 }
 
 
@@ -154,6 +129,7 @@ function spawnNote(column) {
     column.appendChild(note);
     moveNoteDown(note);
 }
+
 
 function moveNoteDown(note) {
     let position = 0;
@@ -227,7 +203,7 @@ function updateScoreDisplay(score) {
         const numbersContainer = document.createElement('div');
         numbersContainer.className = 'score-numbers';
         numbersContainer.style.display = 'inline-flex';
-        numbersContainer.style.marginLeft = '175px';
+        numbersContainer.style.marginLeft = '10px';
         numbersContainer.style.marginTop = '30px';
         scoreDisplay.appendChild(numbersContainer);
     }
@@ -396,65 +372,55 @@ function openDatabase() {
     });
 }
 
-function saveToIndexedDB(storeName, id, data) {
-    return openDatabase().then((db) => {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction(storeName, 'readwrite');
-            const store = transaction.objectStore(storeName);
-            store.put({ id, data });
-
-            transaction.oncomplete = () => resolve();
-            transaction.onerror = (event) => reject(event.target.error);
-        });
-    });
-}
-
-function getFromIndexedDB(storeName, id) {
-    return openDatabase().then((db) => {
-        return new Promise((resolve, reject) => {
-            const transaction = db.transaction(storeName, 'readonly');
-            const store = transaction.objectStore(storeName);
-            const request = store.get(id);
-
-            request.onsuccess = () => resolve(request.result ? request.result.data : null);
-            request.onerror = (event) => reject(event.target.error);
-        });
-    });
-}
-
-
-
-
-let lives = 3; 
 
 function loseLife() {
-    if (lives <= 0) return;
-
-    const lifeElement = document.getElementById(`life-${lives}`);
+    lives--;
+    const lifeElement = document.getElementById(`life-${lives + 1}`);
     if (lifeElement) {
-        lifeElement.classList.add('burn-life'); 
+        lifeElement.classList.add('burn-life');
         setTimeout(() => {
-            lifeElement.style.display = 'none'; 
-        }, 500); 
+            lifeElement.style.display = 'none';
+        }, 500);
     }
 
-    lives--;
-
-    if (lives === 0) {
-        endGame(); 
+    if (lives <= 0) {
+        endGame(false); // Game Over
     }
 }
 
-function endGame() {
-    
+function endGame(completed = false) {
     if (audio) {
-        audio.pause(); 
+        audio.pause();
     }
-    
-    clearInterval(interval); 
-    
+    clearInterval(interval);
+
+    const currentSongId = sessionStorage.getItem('currentSongId');
+    const gameData = {
+        score: currentScore,
+        maxCombo: maxCombo,
+        duration: audio.currentTime,
+        completed: completed,
+        difficulty: getDifficultyFromContent(sessionStorage.getItem('osuContent')),
+        songId: currentSongId,
+        date: new Date().toISOString()
+    };
+
+    localStorage.setItem('lastScore', JSON.stringify(gameData));
+
+    // Actualizar high scores
+    const scores = JSON.parse(localStorage.getItem('gameScores')) || [];
+    scores.push(gameData);
+    localStorage.setItem('gameScores', JSON.stringify(scores));
+
+    // Desbloquear LEGEND solo para la canción actual si se completa en HARD
+    if (completed && gameData.difficulty === 'HARD') {
+        const songLegendStatus = JSON.parse(localStorage.getItem('songsLegendStatus')) || {};
+        songLegendStatus[currentSongId] = true;
+        localStorage.setItem('songsLegendStatus', JSON.stringify(songLegendStatus));
+    }
+
     setTimeout(() => {
-        window.location.href = 'endgame.html'; 
+        window.location.replace(completed ? 'complete.html' : 'endgame.html');
     }, 300);
 }
 
@@ -572,4 +538,25 @@ if (isMobile) {
             }
         }
     });
+}
+
+function getDifficultyFromContent(osuContent) {
+    if (!osuContent) return 'UNKNOWN';
+    
+    const ar = getApproachRate(osuContent);
+    
+    if (ar <= 4) return 'EASY';
+    if (ar <= 5) return 'MEDIUM';
+    if (ar <= 8) return 'HARD';
+    return 'LEGEND';
+}
+
+function getApproachRate(osuContent) {
+    const lines = osuContent.split('\n');
+    for (const line of lines) {
+        if (line.startsWith('ApproachRate:')) {
+            return parseFloat(line.split(':')[1]);
+        }
+    }
+    return 0;
 }

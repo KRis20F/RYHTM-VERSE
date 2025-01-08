@@ -18,3 +18,24 @@
     transform: scale(1.02);
   }
 } 
+
+.category h3.locked {
+  color: #666;
+}
+
+.difficulty-button.locked {
+  opacity: 0.7;
+  background: #444;
+  cursor: not-allowed;
+  position: relative;
+}
+
+.difficulty-button.locked::after {
+  content: '🔒';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}

@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./assets/css/main.css">
-    <title>Endgame</title>
+    <title>Level Complete</title>
 </head>
-<body class="endgame">
-    <div >
+<body class="complete">
+    <div>
         <header class="rythm">
             <h1 id="title">
                 <img src="./assets/img/RHYTHM-VERSE-8-11-2024-2.png" alt="Titulo del juego de ritmo">
@@ -17,25 +17,32 @@
         <main id="Container-dificuld">
             <section id="container-info">
                 <article class="welcome-user">
-                    <h2>GAME OVER!</h2>
-                    <p>Your Lose The Pulse</p>
+                    <h2>LEVEL COMPLETE!</h2>
+                    <p>You've Mastered The Rhythm!</p>
+                    <div id="unlock-message" class="hidden">
+                        <p>¡Has desbloqueado la dificultad LEGEND!</p>
+                        <img src="./assets/img/unlock.png" alt="Unlock icon">
+                    </div>
                 </article>
             </section>
             <section id="dificultds">
-                <a href="#tutorial-popup" class="score" id="easy">Your Score</a>
+                <a href="#tutorial-popup" class="score" id="complete-score">Your Score</a>
+                <a href="./select.html" class="score">Select Song</a>
                 <a href="./game.html" class="score link-PlayAgain">Play Again</a>
             </section>
         </main>
         <div id="tutorial-popup">
             <div class="tutorial-content">
-                <h2>Tu Puntaje Final</h2>
+                <h2>¡Nivel Completado!</h2>
                 <p>Puntaje: <span id="final-score"></span></p>
-                <p>Duración: <span id="final-duration"></span> segundos</p>
+                <p>Combo Máximo: <span id="max-combo"></span></p>
+                <p>Precisión: <span id="accuracy"></span>%</p>
                 <p>Clasificación: <span id="score-classification"></span></p>
 
                 <a href="#" class="close-tutorial">Cerrar</a>
             </div>
+        </div>
     </div>
-    <script src="loseGame.js"></script>
+    <script src="complete.js"></script>
 </body>
-</html>
+</html> 

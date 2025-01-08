@@ -28,13 +28,14 @@
   color: map.get(vars.$colors, text-light);
   box-shadow: 0 0 20px map.get(vars.$colors, accent-neon-cyan);
 
-  h2 {
+  #tutorial-title {
     margin-top: 0;
     font-family: vars.$font-primary;
     font-size: 2em;
     color: map.get(vars.$colors, accent-neon-cyan);
     text-transform: uppercase;
     text-align: center;
+    position: static;
   }
 
   strong {

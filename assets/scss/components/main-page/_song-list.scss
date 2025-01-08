@@ -32,3 +32,8 @@
     color: map.get(vars.$colors, white-transparent-70);
   }
 }
+
+.song-w, .difficulty-title {
+  font-size: 2em;
+  color: map.get(vars.$colors, text-light);
+}

@@ -15,9 +15,9 @@
     }
 
     #scoreDisplay {
-        left: 22%;
+        left: 13%;
         width: 22%;
-        top: 4%;
+        top: 6%;
     }
 
     h1 {display: none;}
@@ -33,7 +33,7 @@
 
     #life-container {
         flex-direction: row;
-        top: 74px;
+        top: 103px;
         margin: 0;
         width: 100%;
         justify-content: space-evenly;
@@ -41,11 +41,6 @@
     }
 
     #life-container img {width: 23%;     height: 100px;}
-
-    .game-container {
-        width: 100%;
-        height: 70vh;
-    }
 
     h2 {    font-size: 1.9em;  top: 29%;}
 
@@ -56,20 +51,45 @@
 
 
     .game-container {
-      width: 100%;
-      height: 70vh;
-      gap: 2px;
-      touch-action: none;
+        height: 70vh;
+        width: 105%;
+        gap: 2px;
+        touch-action: none;
     }
   
     .column {
       padding: 0 5px;
     }
   
-    .hit-zone, 
-    .note {
-      @include mix.responsive-sizes;
-    }
+    .hit-zone{width: 33px; left: 18%;}
 
   }
   
+  @media (min-width: 1650px) and (max-width: 6000px) {
+
+    #top {
+        justify-content: space-evenly;
+        height: 100vh;
+        align-items: center;
+        gap: 100px;
+    }
+
+    #scoreDisplay {
+        top: 73px;
+        position: absolute;
+        left: 58%;
+    }
+
+
+    #difficultyLabel {
+        position: relative;
+        top: 1em;
+        left: 543px;
+    }
+
+    .container {    grid-area: 2 / 2;  }
+    .game-container {
+        height: 570px;
+        top: 0;
+    }
+  }

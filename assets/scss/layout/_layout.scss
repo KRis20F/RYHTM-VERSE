@@ -10,6 +10,14 @@
     min-height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+  } @else if $page == 'endgame' {
+    background-image: url('../skins/bgBlue.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-height: 100vh;
   } @else {
     background: black;
     align-items: center;
@@ -23,6 +31,9 @@
 body {
   @include body-styles('default');
   
+  &.endgame {
+    @include body-styles('endgame');
+  }
   &.main-page {
     @include body-styles('main-pages');
   }
