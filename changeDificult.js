@@ -137,12 +137,12 @@ window.addEventListener('load', () => {
             diffs.forEach(diff => {
                 const button = document.createElement('button');
                 button.className = 'difficulty-button';
-                
-                if (key === 'legend' && !isLegendUnlocked) {
-                    button.classList.add('locked');
-                    button.disabled = true;
-                    button.title = 'Completa esta canción en dificultad HARD para desbloquear LEGEND';
-                }
+                // 
+                // if (key === 'legend' && !isLegendUnlocked) {
+                    // button.classList.add('locked');
+                    // button.disabled = true;
+                    // button.title = 'Completa esta canción en dificultad HARD para desbloquear LEGEND';
+                // }
 
                 button.innerHTML = `
                     <h4>${diff.version}</h4>

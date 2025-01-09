@@ -1,19 +1,12 @@
 @use 'sass:map';
 @use '../abstracts/variables' as vars;
 @use '../abstracts/mixins' as mix;
+@use '../base/animations' as anim;
+@use '../base/typography' as typ;
+
 
 #title {
-  text-align: center;
-  font-family: vars.$font-primary;
-  font-size: 3em;
-  text-transform: uppercase;
-  color: transparent;
-  background: vars.$gradient-animation;
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-stroke: 1px map.get(vars.$colors, text-light);
-  filter: drop-shadow(2px 2px 15px map.get(vars.$colors, highlight-blue));
-  animation: bg-shift 5s ease-in-out infinite alternate;
+  @include typ.h1;
 
   > img {
     max-width: 100%;
@@ -73,12 +66,6 @@ h2 {
     transform: scale(1.1);
     box-shadow: 0 0 30px map.get(vars.$colors, accent-neon-cyan),
                 0 0 20px map.get(vars.$colors, accent-neon-pink);
-  }
-}
-
-.dificult {
-  &:hover {
-    animation: hover 1s infinite ease-in-out;
   }
 }
 
@@ -160,55 +147,3 @@ h2 {
   display: flex;
 }
 
-.img-nota-tuto {
-  width: 55px;
-}
-
-.left {
-  transform: rotate(182deg);
-}
-
-.down {
-  transform: rotate(87deg);
-}
-
-.up {
-  transform: rotate(270deg);
-}
-
-.right {
-  transform: rotate(358deg);
-}
-
-@keyframes bg-shift {
-  0% {
-    background-position: 0% 0%;
-  }
-  100% {
-    background-position: 100% 100%;
-  }
-}
-
-@keyframes bg-shift2 {
-  0% {
-    background-position: 0% 0%;
-  }
-  50% {
-    background-position: 100% 100%;
-  }
-  100% {
-    background-position: 0% 0%;
-  }
-}
-
-@keyframes hover {
-  0% {
-    transform: translatey(-10px) rotatez(-5deg) perspective(200px) translatez(0);
-  }
-  50% {
-    transform: translatey(-10px) rotatez(-5deg) perspective(200px) translatez(50px);
-  }
-  100% {
-    transform: translatey(-10px) rotatez(-5deg) perspective(200px) translatez(0);
-  }
-}

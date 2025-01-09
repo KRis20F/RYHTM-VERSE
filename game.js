@@ -6,6 +6,7 @@ let interval;
 let audio;
 let currentCombo = 0;
 let maxCombo = 0;
+let lives = 3; // Número inicial de vidas
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const osuContent = sessionStorage.getItem('osuContent');
@@ -143,11 +144,13 @@ function moveNoteDown(note) {
             if (position > 800) {
                 clearInterval(interval);
                 note.remove();
+                // loseLife(); // Perder vida si la nota se pasa
             }
         } else {
             if (position > 540) {
                 clearInterval(interval);
                 note.remove();
+                // loseLife(); // Perder vida si la nota se pasa
             }
         }
     }, 8);
@@ -307,6 +310,7 @@ function handleInput(column) {
         showJudgement('shit');
         showHitValue(0);
         currentCombo = 0;
+        loseLife();
     }
 
     if (isCorrect) {
