@@ -153,7 +153,7 @@ function moveNoteDown(note) {
                 // loseLife(); // Perder vida si la nota se pasa
             }
         }
-    }, 8);
+    }, 7);
 }
 
 
