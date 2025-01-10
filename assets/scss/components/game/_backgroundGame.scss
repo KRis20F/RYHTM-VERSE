@@ -17,7 +17,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: map.get(vars.$colors, navy);
+    // background: map.get(vars.$colors, navy);
     z-index: -1; 
     border: 8px solid;
     border-color: darkmagenta magenta;
@@ -31,11 +31,15 @@
     top: 0;
     width: 100%;
     height: 100%;
-    background: repeating-linear-gradient(pink 2px, transparent 3px, transparent 30px),
-                repeating-linear-gradient(90deg, pink 2px, transparent 3px, transparent 40px) 10px 0;
-    filter: drop-shadow(0 0 1px magenta) drop-shadow(0 0 3px magenta) drop-shadow(0 0 7px cyan);
-    animation: anim.$move 30s linear infinite;
-    opacity: 0.2;
+    
+    // background: repeating-linear-gradient(pink 2px, transparent 3px, transparent 30px),
+                // repeating-linear-gradient(90deg, pink 2px, transparent 3px, transparent 40px) 10px 0;
+    // filter: drop-shadow(0 0 1px magenta) drop-shadow(0 0 3px magenta) drop-shadow(0 0 7px cyan);
+    // animation: anim.$move 30s linear infinite;
+    
+    img {
+        width: 100%;
+    }
 }
 
 

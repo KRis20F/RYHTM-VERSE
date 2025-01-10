@@ -21,7 +21,8 @@
     box-sizing: border-box;
     overflow: hidden;
     min-height: 100vh;
-  } @else {
+  } 
+  @else {
     background: black;
     align-items: center;
     position: relative;

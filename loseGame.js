@@ -20,13 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
 function showHighScores() {
     const scores = JSON.parse(localStorage.getItem('gameScores')) || [];
     
-    // Ordenar puntuaciones de mayor a menor
     scores.sort((a, b) => b.score - a.score);
     
-    // Mostrar solo los 5 mejores puntajes
     const topScores = scores.slice(0, 5);
-    
-    // Crear elemento para mostrar high scores
+
+
     const highScoresDiv = document.createElement('div');
     highScoresDiv.className = 'high-scores';
     highScoresDiv.innerHTML = `
