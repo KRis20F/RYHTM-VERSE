@@ -2,8 +2,17 @@
 
 @media (max-width: 780px) {
 
+    .song-card {width: 90% !important;}
+
+    .difficulty-buttons {    flex-direction: column;}
 
     .select {  flex-direction: column;  }
+
+    #sky {
+        img {
+            height: 100%;
+        }
+    }
 
     
     .wrapper {
@@ -60,6 +69,7 @@
         width: 105%;
         gap: 2px;
         touch-action: none;
+        top: -61px;
     }
   
     .column {

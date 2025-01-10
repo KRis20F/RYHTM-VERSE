@@ -15,6 +15,7 @@
     width: 100%;
     height: 100%;
     transition: opacity 0.5s ease-in-out;
+    z-index: 99;
 }
 
 #character-fire {
@@ -25,5 +26,6 @@
 #character-fire.fire-effect {
     animation: animations.$fire 1s infinite alternate;
     opacity: 1;
+    z-index: 999;
     will-change: transform, filter;
 }
