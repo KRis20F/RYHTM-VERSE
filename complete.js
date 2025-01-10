@@ -1,12 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Obtener los datos del último juego
+    
     const gameData = JSON.parse(localStorage.getItem('lastScore'));
     
     if (gameData) {
-        // Mostrar el mensaje de desbloqueo de LEGEND si corresponde
-        checkUnlockLegend(gameData);
         
-        // Mostrar el popup con los puntajes
+        checkUnlockLegend(gameData);
+
+    
         const finalScore = document.getElementById('final-score');
         const maxComboElem = document.getElementById('max-combo');
         const accuracyElem = document.getElementById('accuracy');
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (maxComboElem) maxComboElem.textContent = gameData.maxCombo;
         if (accuracyElem) accuracyElem.textContent = calculateAccuracy(gameData.score).toFixed(2);
         
-        // Determinar clasificación
+        
         let classification;
         if (gameData.score >= 60000) {
             classification = "Master";
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (classificationElem) classificationElem.textContent = classification;
 
-        // Mostrar high scores
+    
         showHighScores();
     }
 });
@@ -53,8 +53,8 @@ function checkUnlockLegend(gameData) {
 } 
 
 function calculateAccuracy(score) {
-    // Ejemplo simple de cálculo de precisión basado en el puntaje
-    const maxPossibleScore = 1500; // Ajusta este valor según tu lógica de juego
+    
+    const maxPossibleScore = 1500; 
     return (score / maxPossibleScore) * 100;
 }
 
@@ -80,7 +80,7 @@ function showHighScores() {
     
     const tutorialContent = document.querySelector('.tutorial-content');
     if (tutorialContent) {
-        // Eliminar high scores anteriores si existen
+        
         const existingHighScores = tutorialContent.querySelector('.high-scores');
         if (existingHighScores) {
             existingHighScores.remove();

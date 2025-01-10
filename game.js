@@ -147,13 +147,13 @@ function moveNoteDown(note) {
             if (position > 800) {
                 clearInterval(interval);
                 note.remove();
-                // loseLife(); // Perder vida si la nota se pasa
+                // loseLife(); 
             }
         } else {
             if (position > 540) {
                 clearInterval(interval);
                 note.remove();
-                // loseLife(); // Perder vida si la nota se pasa
+                // loseLife(); 
             }
         }
     }, 7);
@@ -274,14 +274,14 @@ function handleInput(column) {
     const notes = Array.from(column.querySelectorAll('.note'));
     if (!notes.length) return;
 
-    // Ordenar las notas por posición (las más cercanas primero)
+   
     notes.sort((a, b) => {
         const posA = parseInt(a.style.top, 10);
         const posB = parseInt(b.style.top, 10);
         return posA - posB;
     });
 
-    // Revisar todas las notas en rango de hit
+    
     notes.forEach(note => {
         const position = parseInt(note.style.top, 10);
         let isCorrect = false;
@@ -414,7 +414,7 @@ function loseLife() {
     }
 
     if (lives <= 0) {
-        endGame(false); // Game Over
+        endGame(false); 
     }
 }
 
@@ -437,12 +437,11 @@ function endGame(completed = false) {
 
     localStorage.setItem('lastScore', JSON.stringify(gameData));
 
-    // Actualizar high scores
+   
     const scores = JSON.parse(localStorage.getItem('gameScores')) || [];
     scores.push(gameData);
     localStorage.setItem('gameScores', JSON.stringify(scores));
-
-    // Desbloquear LEGEND solo para la canción actual si se completa en HARD
+    
     if (completed && gameData.difficulty === 'HARD') {
         const songLegendStatus = JSON.parse(localStorage.getItem('songsLegendStatus')) || {};
         songLegendStatus[currentSongId] = true;
@@ -462,7 +461,7 @@ const maxHits = 5;
 const baseImage = document.getElementById('character-base');
 const fireImage = document.getElementById('character-fire');
 
-// // Función para manejar los aciertos
+
 function handleHit(isCorrect) {
     if (isCorrect) {
         consecutiveHits++;

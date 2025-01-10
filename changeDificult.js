@@ -224,7 +224,7 @@ window.addEventListener('load', () => {
                 </div>
             `;
             
-            // Limpiar y mostrar estado de carga
+            
             const difficultyContainer = document.getElementById('difficultyContainer');
             if (difficultyContainer) {
                 difficultyContainer.innerHTML = `
@@ -238,11 +238,11 @@ window.addEventListener('load', () => {
                 `;
             }
 
-            // Cargar las nuevas dificultades
+
             loadDefaultSong(song);
         }
 
-        // Navegación de canciones
+      
         const prevButton = document.querySelector('.prev-song');
         const nextButton = document.querySelector('.next-song');
 
@@ -256,7 +256,7 @@ window.addEventListener('load', () => {
             updateSongDisplay();
         });
 
-        // Mostrar la primera canción
+        
         updateSongDisplay();
     }
 
