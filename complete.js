@@ -18,14 +18,22 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Determinar clasificación
         let classification;
-        if (gameData.score >= 1000) {
+        if (gameData.score >= 60000) {
             classification = "Master";
-        } else if (gameData.score >= 500) {
+            document.getElementById('Messege').textContent = "Master";
+        } else if (gameData.score >= 40000) {
             classification = "Pro";
-        } else if (gameData.score >= 100) {
+            document.getElementById('Messege').textContent = "Pro";
+        } else if (gameData.score >= 20000) {
             classification = "Amateur";
-        } else {
+            document.getElementById('Messege').textContent = "Amateur";
+        } else if (gameData.score >= 10000) {
             classification = "Beginner";
+            document.getElementById('Messege').textContent = "Beginner";
+        } else {
+            classification = "Noob";
+            document.getElementById('Messege').textContent = "Noob";
+
         }
         if (classificationElem) classificationElem.textContent = classification;
 
@@ -34,13 +42,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
+function checkUnlockLegend(gameData) {
+    if (gameData.difficulty === 'HARD' && gameData.completed && gameData.score >= 500) { 
+        localStorage.setItem('legendUnlocked', 'true');
+        const unlockMessage = document.getElementById('unlock-message');
+        if (unlockMessage) {
+            unlockMessage.classList.remove('hidden');
+        }
+    }
+} 
+
 function calculateAccuracy(score) {
     // Ejemplo simple de cálculo de precisión basado en el puntaje
     const maxPossibleScore = 1500; // Ajusta este valor según tu lógica de juego
     return (score / maxPossibleScore) * 100;
 }
 
-// Reutilizar la función de showHighScores de loseGame.js
 function showHighScores() {
     const scores = JSON.parse(localStorage.getItem('gameScores')) || [];
     scores.sort((a, b) => b.score - a.score);
@@ -72,12 +89,11 @@ function showHighScores() {
     }
 }
 
-function checkUnlockLegend(gameData) {
-    if (gameData.difficulty === 'HARD' && gameData.completed && gameData.score >= 500) { 
-        localStorage.setItem('legendUnlocked', 'true');
-        const unlockMessage = document.getElementById('unlock-message');
-        if (unlockMessage) {
-            unlockMessage.classList.remove('hidden');
-        }
-    }
-} 
+
+
+
+
+
+
+
+

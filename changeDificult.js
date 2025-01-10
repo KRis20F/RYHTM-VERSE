@@ -1,14 +1,16 @@
 window.addEventListener('load', () => {
     const defaultSongs = [
-        { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz', legendUnlocked: false },
-        { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz', legendUnlocked: false },
-        { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz', legendUnlocked: false},
-        { id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz', legendUnlocked: false},
-        { id: '100649', title:'Viva La Vida',artist: 'Coldplay',oszFile: '100649 Coldplay - Viva La Vida.osz', legendUnlocked: false},
-        { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz', legendUnlocked: false},
-        { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz', legendUnlocked: false},
-        { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz', legendUnlocked: false},
-        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz', legendUnlocked: false}
+        { id: '347765', title: 'Racemization', artist: 'Camellia', oszFile: '347765 Camellia - Racemization.osz', legendUnlocked: false, img: 'Race.jpg'},
+        { id: '1007069', title: 'Killer Queen', artist: 'Queen', oszFile: '1007069 Queen - Killer Queen.osz', legendUnlocked: false, img: 'Queen.webp'},
+        { id: '59619',title: 'Paradise',artist: 'Coldplay',oszFile: '59619 Coldplay - Paradise.osz', legendUnlocked: false, img: 'bgCold.jpg'},
+        { id: '576030',title: 'Battle Against a True Hero',artist: 'toby fox vs. Ferdk',oszFile: '576030 toby fox vs. Ferdk - Battle Against a True Hero.osz', legendUnlocked: false, img: 'bgUn.jpg'},
+        { id: '100649', title:'Viva La Vida',artist: 'Coldplay',oszFile: '100649 Coldplay - Viva La Vida.osz', legendUnlocked: false, img: 'bgCold.jpg'},
+        { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz', legendUnlocked: false, img: 'bgMiku.webp'},
+        { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz', legendUnlocked: false, img: 'Queen.webp'},
+        { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz', legendUnlocked: false, img: 'Take.jpg'},
+        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz', legendUnlocked: false, img: 'Meta.png'},
+        { id: '789869', title: 'liquated', artist: 'Camellia', oszFile: '789869 Camellia - liquated.osz', legendUnlocked: false, img: 'Liq.jpg'},
+        { id: '895391', title: 'Sunflower', artist: 'Post Malone, Swae Lee', oszFile: '895391 Post Malone, Swae Lee - Sunflower.osz', legendUnlocked: false, img: 'Sun.jpg'}
     ];
 
     async function processOszFile(file, songId) {
@@ -122,6 +124,7 @@ window.addEventListener('load', () => {
             categoryDiv.className = 'category';
 
             const categoryTitle = document.createElement('h3');
+            categoryTitle.className = `category-title ${key}-title`;
             categoryTitle.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (${diffs.length})`;
             
             if (key === 'legend' && !isLegendUnlocked) {
@@ -137,16 +140,22 @@ window.addEventListener('load', () => {
             diffs.forEach(diff => {
                 const button = document.createElement('button');
                 button.className = 'difficulty-button';
-                // 
-                // if (key === 'legend' && !isLegendUnlocked) {
-                    // button.classList.add('locked');
-                    // button.disabled = true;
-                    // button.title = 'Completa esta canción en dificultad HARD para desbloquear LEGEND';
-                // }
+                
+                if (key === 'legend' && !isLegendUnlocked) {
+                    button.classList.add('locked');
+                    button.disabled = true;
+                    button.title = 'Completa esta canción en dificultad HARD para desbloquear LEGEND';
+                }
 
                 button.innerHTML = `
-                    <h4>${diff.version}</h4>
-                    <p>AR: ${diff.approachRate} | CS: ${diff.circleSize} | HP: ${diff.hpDrain}</p>
+                    <div class="diff-info">
+                        <h4>${diff.version}</h4>
+                        <div class="diff-stats">
+                            <span>AR: ${diff.approachRate}</span>
+                            <span>CS: ${diff.circleSize}</span>
+                            <span>HP: ${diff.hpDrain}</span>
+                        </div>
+                    </div>
                 `;
 
                 button.addEventListener('click', () => {
@@ -182,7 +191,19 @@ window.addEventListener('load', () => {
             await processOszFile(new File([blob], song.oszFile), song.id);
         } catch (error) {
             console.error('Error al cargar la canción:', error);
-            alert(`Error al cargar la canción: ${song.oszFile}`);
+            const difficultyContainer = document.getElementById('difficultyContainer');
+            if (difficultyContainer) {
+                difficultyContainer.innerHTML = `
+                    <div class="category error">
+                        <div class="difficulty-button">
+                            <div class="diff-info">
+                                <h4>Error al cargar las dificultades</h4>
+                                <p class="diff-stats">Intenta de nuevo</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
     }
 
@@ -190,19 +211,53 @@ window.addEventListener('load', () => {
         const songList = document.querySelector('.song-list');
         if (!songList) return;
 
-        songList.innerHTML = '';
-        defaultSongs.forEach(song => {
-            const songCard = document.createElement('div');
-            songCard.className = 'song-card';
-            songCard.innerHTML = `
-                <div class="song-info">
-                    <h3>${song.title}</h3>
-                    <p>${song.artist}</p>
+        let currentSongIndex = 0;
+
+        function updateSongDisplay() {
+            const song = defaultSongs[currentSongIndex];
+            songList.innerHTML = `
+                <div class="song-card active" style="background-image: url('./assets/img/${song.img}'); background-size: cover; background-position: center;">
+                    <div class="song-info">
+                        <h3>${song.title}</h3>
+                        <p>${song.artist}</p>
+                    </div>
                 </div>
             `;
-            songCard.addEventListener('click', () => loadDefaultSong(song));
-            songList.appendChild(songCard);
+            
+            // Limpiar y mostrar estado de carga
+            const difficultyContainer = document.getElementById('difficultyContainer');
+            if (difficultyContainer) {
+                difficultyContainer.innerHTML = `
+                    <div class="category">
+                        <div class="difficulty-button">
+                            <div class="diff-info">
+                                <h4>Cargando dificultades...</h4>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Cargar las nuevas dificultades
+            loadDefaultSong(song);
+        }
+
+        // Navegación de canciones
+        const prevButton = document.querySelector('.prev-song');
+        const nextButton = document.querySelector('.next-song');
+
+        prevButton.addEventListener('click', () => {
+            currentSongIndex = (currentSongIndex - 1 + defaultSongs.length) % defaultSongs.length;
+            updateSongDisplay();
         });
+
+        nextButton.addEventListener('click', () => {
+            currentSongIndex = (currentSongIndex + 1) % defaultSongs.length;
+            updateSongDisplay();
+        });
+
+        // Mostrar la primera canción
+        updateSongDisplay();
     }
 
     loadSongList();

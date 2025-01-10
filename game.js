@@ -6,7 +6,10 @@ let interval;
 let audio;
 let currentCombo = 0;
 let maxCombo = 0;
-let lives = 3; // Número inicial de vidas
+let lives = 3; 
+
+const pressedKeys = new Set();
+
 document.addEventListener('DOMContentLoaded', async () => {
     try {
         const osuContent = sessionStorage.getItem('osuContent');
@@ -268,59 +271,64 @@ function showHitValue(value) {
 
 
 function handleInput(column) {
-    const note = column.querySelector('.note');
-    if (!note) return;
+    const notes = Array.from(column.querySelectorAll('.note'));
+    if (!notes.length) return;
 
-    const position = parseInt(note.style.top, 10);
-    let isCorrect = false;
+    // Ordenar las notas por posición (las más cercanas primero)
+    notes.sort((a, b) => {
+        const posA = parseInt(a.style.top, 10);
+        const posB = parseInt(b.style.top, 10);
+        return posA - posB;
+    });
 
-    const ranges = isMobile ? {
-        marvelous: { min: 750, max: 790 },
-        sick: { min: 730, max: 810 },
-        good: { min: 710, max: 830 },
-        bad: { min: 690, max: 850 }
-    } : {
-        marvelous: { min: 440, max: 460 },
-        sick: { min: 420, max: 480 },
-        good: { min: 380, max: 420 },
-        bad: { min: 340, max: 380 }
-    };
+    // Revisar todas las notas en rango de hit
+    notes.forEach(note => {
+        const position = parseInt(note.style.top, 10);
+        let isCorrect = false;
 
-    if (position >= ranges.marvelous.min && position <= ranges.marvelous.max) {
-        showJudgement('marvelous');
-        updateScore(500);
-        showHitValue(500);
-        isCorrect = true;
-    } else if (position >= ranges.sick.min && position <= ranges.sick.max) {
-        showJudgement('sick');
-        updateScore(300);
-        showHitValue(300);
-        isCorrect = true;
-    } else if (position >= ranges.good.min && position <= ranges.good.max) {
-        showJudgement('good');
-        updateScore(100);
-        showHitValue(100);
-        isCorrect = true;
-    } else if (position >= ranges.bad.min && position <= ranges.bad.max) {
-        showJudgement('bad');
-        updateScore(50);
-        showHitValue(50);
-        isCorrect = true;
-    } else {
-        showJudgement('shit');
-        showHitValue(0);
-        currentCombo = 0;
-        loseLife();
-    }
+        const ranges = isMobile ? {
+            marvelous: { min: 750, max: 790 },
+            sick: { min: 730, max: 810 },
+            good: { min: 710, max: 830 },
+            bad: { min: 690, max: 850 }
+        } : {
+            marvelous: { min: 440, max: 460 },
+            sick: { min: 420, max: 480 },
+            good: { min: 380, max: 420 },
+            bad: { min: 340, max: 380 }
+        };
 
-    if (isCorrect) {
-        currentCombo++;
-        maxCombo = Math.max(maxCombo, currentCombo);
-        note.remove();
-    }
+        if (position >= ranges.marvelous.min && position <= ranges.marvelous.max) {
+            showJudgement('marvelous');
+            updateScore(500);
+            showHitValue(500);
+            isCorrect = true;
+        } else if (position >= ranges.sick.min && position <= ranges.sick.max) {
+            showJudgement('sick');
+            updateScore(300);
+            showHitValue(300);
+            isCorrect = true;
+        } else if (position >= ranges.good.min && position <= ranges.good.max) {
+            showJudgement('good');
+            updateScore(100);
+            showHitValue(100);
+            isCorrect = true;
+        } else if (position >= ranges.bad.min && position <= ranges.bad.max) {
+            showJudgement('bad');
+            updateScore(50);
+            showHitValue(50);
+            isCorrect = true;
+        }
+
+        if (isCorrect) {
+            currentCombo++;
+            maxCombo = Math.max(maxCombo, currentCombo);
+            note.remove();
+            handleHit(true);
+        }
+    });
 
     updateComboDisplay();
-    handleHit(isCorrect);
 }
 
 function throttle(func, limit) {
@@ -353,9 +361,27 @@ if (isMobile) {
     };
 
     document.addEventListener('keydown', (event) => {
-        if (event.key in keyMap) {
+        if (event.key in keyMap && !pressedKeys.has(event.key)) {
+            pressedKeys.add(event.key);
             const columns = document.querySelectorAll('.column');
-            throttledHandleInput(columns[keyMap[event.key]]);
+            const column = columns[keyMap[event.key]];
+            if (column) {
+                const hitZone = column.querySelector('.hit-zone');
+                hitZone.classList.add('pressed');
+                throttledHandleInput(column);
+            }
+        }
+    });
+
+    document.addEventListener('keyup', (event) => {
+        if (event.key in keyMap) {
+            pressedKeys.delete(event.key);
+            const columns = document.querySelectorAll('.column');
+            const column = columns[keyMap[event.key]];
+            if (column) {
+                const hitZone = column.querySelector('.hit-zone');
+                hitZone.classList.remove('pressed');
+            }
         }
     });
 }

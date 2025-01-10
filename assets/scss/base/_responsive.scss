@@ -1,6 +1,11 @@
 @use '../abstracts/mixins' as mix;
 
 @media (max-width: 780px) {
+
+
+    .select {  flex-direction: column;  }
+
+    
     .wrapper {
         grid-template-rows: 15% 1fr;
         grid-template-columns: 0;
@@ -11,7 +16,7 @@
         place-content: center;
         width: 85%;
         margin: 0 auto;
-        height: 76dvh;
+        height: 100dvh;
     }
 
     #scoreDisplay {

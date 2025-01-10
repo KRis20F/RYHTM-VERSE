@@ -7,10 +7,13 @@
     background-size: cover;
     background-attachment: fixed;
     color: white;
-    min-height: 100vh;
+    min-height: 86vh;
     overflow-y: auto;
     overflow-x: hidden;
-  } @else if $page == 'endgame' {
+  }@else if $page == 'complete' {
+    background-image: url('../img/wallpaper2.webp');
+    background-attachment: fixed;
+  }@else if $page == 'endgame' {
     background-image: url('../skins/bgBlue.png');
     background-size: cover;
     background-repeat: no-repeat;
@@ -30,6 +33,10 @@
 // Aplicar estilos según la clase del body
 body {
   @include body-styles('default');
+
+  &.complete {
+    @include body-styles('complete');
+  }
   
   &.endgame {
     @include body-styles('endgame');
@@ -44,3 +51,15 @@ body {
   margin: 0 auto;
   z-index: 2;
 } 
+
+.select {
+  display: flex;
+}
+
+.song-w {
+  font-size: 2.4em;
+  text-align: center;
+  color: white;
+  margin-inline: 56px;
+
+}
