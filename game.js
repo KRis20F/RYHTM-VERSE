@@ -10,7 +10,24 @@ let lives = 3;
 
 const pressedKeys = new Set();
 
+// Función para precargar imágenes
+function preloadImages() {
+    const imageUrls = [
+        './assets/skins/marvelous.png',
+        './assets/skins/sick.png',
+        './assets/skins/good.png',
+        './assets/skins/bad.png',
+        // Añade todas las imágenes que necesites precargar
+    ];
+
+    imageUrls.forEach(url => {
+        const img = new Image();
+        img.src = url;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+    preloadImages();
     try {
         const osuContent = sessionStorage.getItem('osuContent');
         
@@ -128,7 +145,15 @@ function parseOsuMap(osuText) {
 
 function spawnNote(column) {
     const note = document.createElement('div');
-    note.classList.add('note', column.getAttribute('data-direction'));
+    const direction = column.getAttribute('data-direction');
+    note.classList.add('note');
+    
+    // Asegurarnos de que la ruta sea correcta
+    note.style.backgroundImage = `url('./assets/img/nota-${direction}.png')`; // Verifica que esta ruta sea correcta
+    
+    // Para debug - verifica si la imagen se está cargando
+    console.log(`Cargando nota: ./assets/img/nota-${direction}.png`);
+    
     note.style.top = '0px';
     column.appendChild(note);
     moveNoteDown(note);
@@ -137,26 +162,23 @@ function spawnNote(column) {
 
 function moveNoteDown(note) {
     let position = 0;
-    const noteSpeed = isMobile ? 4 : 6;
+    const noteSpeed = isMobile ? 6 : 7;
     
-    const interval = setInterval(() => {
+    function animate() {
         position += noteSpeed;
-        note.style.top = `${position}px`;
+        note.style.transform = `translateY(${position}px)`;
         
-        if (isMobile) {
-            if (position > 800) {
-                clearInterval(interval);
-                note.remove();
-                // loseLife(); 
-            }
+        const limit = isMobile ? 800 : 600;
+        if (position <= limit) {
+            requestAnimationFrame(animate);
         } else {
-            if (position > 540) {
-                clearInterval(interval);
-                note.remove();
-                // loseLife(); 
-            }
+            note.remove();
+            currentCombo = 0;
+            updateComboDisplay();
         }
-    }, 7);
+    }
+    
+    requestAnimationFrame(animate);
 }
 
 
@@ -223,7 +245,6 @@ function updateScoreDisplay(score) {
         
         const img = document.createElement('img');
         img.src = `./assets/skins/num${num}.png`;
-        img.style.height = '40px'; 
         img.style.width = 'auto';
         
         img.onerror = () => {
@@ -274,61 +295,53 @@ function handleInput(column) {
     const notes = Array.from(column.querySelectorAll('.note'));
     if (!notes.length) return;
 
-   
-    notes.sort((a, b) => {
-        const posA = parseInt(a.style.top, 10);
-        const posB = parseInt(b.style.top, 10);
-        return posA - posB;
-    });
+    const note = notes[0];
+    const position = parseFloat(note.style.transform.split('translateY(')[1]) || 0;
 
-    
-    notes.forEach(note => {
-        const position = parseInt(note.style.top, 10);
-        let isCorrect = false;
+    // Rangos separados para PC y móvil
+    const ranges = isMobile ? {
+        marvelous: { min: 380, max: 460 },
+        sick: { min: 340, max: 500 },
+        good: { min: 300, max: 540 },
+        bad: { min: 260, max: 580 }
+    } : {
+        marvelous: { min: 440, max: 460 },
+        sick: { min: 420, max: 480 },
+        good: { min: 380, max: 520 },
+        bad: { min: 340, max: 560 }
+    };
 
-        const ranges = isMobile ? {
-            marvelous: { min: 750, max: 790 },
-            sick: { min: 730, max: 810 },
-            good: { min: 710, max: 830 },
-            bad: { min: 690, max: 850 }
-        } : {
-            marvelous: { min: 440, max: 460 },
-            sick: { min: 420, max: 480 },
-            good: { min: 380, max: 420 },
-            bad: { min: 340, max: 380 }
-        };
+    let isCorrect = false;
 
-        if (position >= ranges.marvelous.min && position <= ranges.marvelous.max) {
-            showJudgement('marvelous');
-            updateScore(500);
-            showHitValue(500);
-            isCorrect = true;
-        } else if (position >= ranges.sick.min && position <= ranges.sick.max) {
-            showJudgement('sick');
-            updateScore(300);
-            showHitValue(300);
-            isCorrect = true;
-        } else if (position >= ranges.good.min && position <= ranges.good.max) {
-            showJudgement('good');
-            updateScore(100);
-            showHitValue(100);
-            isCorrect = true;
-        } else if (position >= ranges.bad.min && position <= ranges.bad.max) {
-            showJudgement('bad');
-            updateScore(50);
-            showHitValue(50);
-            isCorrect = true;
-        }
+    if (position >= ranges.marvelous.min && position <= ranges.marvelous.max) {
+        showJudgement('marvelous');
+        updateScore(500);
+        showHitValue(500);
+        isCorrect = true;
+    } else if (position >= ranges.sick.min && position <= ranges.sick.max) {
+        showJudgement('sick');
+        updateScore(300);
+        showHitValue(300);
+        isCorrect = true;
+    } else if (position >= ranges.good.min && position <= ranges.good.max) {
+        showJudgement('good');
+        updateScore(100);
+        showHitValue(100);
+        isCorrect = true;
+    } else if (position >= ranges.bad.min && position <= ranges.bad.max) {
+        showJudgement('bad');
+        updateScore(50);
+        showHitValue(50);
+        isCorrect = true;
+    }
 
-        if (isCorrect) {
-            currentCombo++;
-            maxCombo = Math.max(maxCombo, currentCombo);
-            note.remove();
-            handleHit(true);
-        }
-    });
-
-    updateComboDisplay();
+    if (isCorrect) {
+        note.remove();
+        currentCombo++;
+        maxCombo = Math.max(maxCombo, currentCombo);
+        handleHit(true);
+        updateComboDisplay();
+    }
 }
 
 function throttle(func, limit) {
@@ -342,17 +355,17 @@ function throttle(func, limit) {
     };
 }
 
-const throttledHandleInput = throttle(handleInput, 16);
-
 if (isMobile) {
     const columns = document.querySelectorAll('.column');
     columns.forEach(column => {
         column.addEventListener('touchstart', (event) => {
             event.preventDefault();
-            throttledHandleInput(column);
+            handleInput(column);
         }, { passive: false });
     });
 } else {
+    const throttledHandleInput = throttle(handleInput, 16);
+
     const keyMap = {
         'd': 0,
         'f': 1,
@@ -383,22 +396,6 @@ if (isMobile) {
                 hitZone.classList.remove('pressed');
             }
         }
-    });
-}
-
-function openDatabase() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open('gameDB', 1);
-
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains('audioFiles')) {
-                db.createObjectStore('audioFiles');
-            }
-        };
-
-        request.onsuccess = (event) => resolve(event.target.result);
-        request.onerror = (event) => reject(event.target.error);
     });
 }
 

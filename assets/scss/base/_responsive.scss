@@ -14,6 +14,13 @@
         }
     }
 
+    #scoreDisplay img {
+        height: 30px ;
+    }
+
+    .score-numbers {
+        margin-top: 12px !important;
+    }
     
     .wrapper {
         grid-template-rows: 15% 1fr;
@@ -47,16 +54,18 @@
 
     #life-container {
         flex-direction: row;
-        top: 103px;
+        top: 10px;
         margin: 0;
-        width: 100%;
+        width: 80%;
         justify-content: space-evenly;
         position: relative;
     }
 
+
+
     #life-container img {width: 23%;     height: 100px;}
 
-    h2 {    font-size: 1.9em;  top: 29%;}
+    h2 {    font-size: 1.4em;  top: 29%;}
 
     #character-container {
         width: 98vw;
@@ -65,18 +74,26 @@
 
 
     .game-container {
-        height: 70vh;
+        height: 77vh;
         width: 105%;
         gap: 2px;
         touch-action: none;
-        top: -61px;
+        top: -30px;
+        left: -11px;
     }
   
     .column {
       padding: 0 5px;
     }
   
-    .hit-zone{width: 33px; left: 18%;}
+    .hit-zone{width: 33px; left: 13%; top: 84%;}
+
+    .note {
+        position: absolute;
+        left: 3%;
+        transform: translateY(0);
+        will-change: transform;
+    }
 
   }
   
@@ -106,5 +123,44 @@
     .game-container {
         height: 570px;
         top: 0;
+    }
+  }
+
+  @media (max-width: 768px) {
+    body {
+        overflow: hidden;
+        touch-action: none;
+    }
+
+    .wrapper {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    #character-container {
+        height: 70vh;
+        width: 100%;
+    }
+
+    #scoreDisplay {
+        top: 6vh;
+        left: 50%;
+        transform: translateX(-50%);
+        width: auto;
+    }
+
+    #comboDisplay {
+        top: 20vh;
+    }
+
+    #judgementDisplay {
+        top: 40vh;
+    }
+
+    .hit-zone.pressed {
+        transform: scale(0.9);
+        opacity: 0.8;
+        transition: all 0.1s ease;
     }
   }

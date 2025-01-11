@@ -4,15 +4,12 @@
     width: 90%;
     height: 80px;
     position: absolute;
-    left: 60%;
-    transform: translateX(-50%);
+    left: 15%;
     background-repeat: no-repeat;
     background-size: contain;
     background-position: center;
     z-index: 1;
-    will-change: transform, top;
-    transition: transform 0.1s ease-out;
-  background-image: url('../img/nota.png');
+    will-change: top;
 }
 
 .hit-zone.pressed {
@@ -36,7 +33,7 @@ $hit-zone-rotations: (
 
 .note {
   &.down {
-    @include mix.note-rotation(90);
+    @include mix.note-rotation(90) ;
   }
   
   &.up {
@@ -44,6 +41,7 @@ $hit-zone-rotations: (
   }
   
   &.left {
+    
     @include mix.note-rotation(-179);
   }
   

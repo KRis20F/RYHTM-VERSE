@@ -38,7 +38,7 @@
 
 @mixin note-rotation($degrees) {
   background-color: transparent;
-  transform: translateX(-50%) rotate(#{$degrees}deg);
+  transform: translateX(-50%) rotate(#{$degrees}deg) ;
 }
 
 @mixin responsive-sizes {
