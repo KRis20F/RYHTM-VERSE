@@ -8,7 +8,7 @@ window.addEventListener('load', () => {
         { id: '700945', title: 'levan polkka', artist: 'Miku', oszFile: '700945 Otomania - Ievan Polkka.osz', legendUnlocked: false, img: 'bgMiku.webp'},
         { id: '2068931', title: 'Dont Stop Me Now', artist: 'Queen', oszFile: '2068931 Queen - Don\'t Stop Me Now.osz', legendUnlocked: false, img: 'Queen.webp'},
         { id: '601347', title: 'Take On Me', artist: 'A-HA', oszFile: '601347 a-ha - Take On Me.osz', legendUnlocked: false, img: 'Take.jpg'},
-        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz', legendUnlocked: false, img: 'Meta.png'},
+        { id: '1750732', title: 'Metamorphosis', artist: 'INTERWORLD', oszFile: '1750732 INTERWORLD - METAMORPHOSIS.osz', legendUnlocked: true, img: 'Meta.png'},
         { id: '789869', title: 'liquated', artist: 'Camellia', oszFile: '789869 Camellia - liquated.osz', legendUnlocked: false, img: 'Liq.jpg'},
         { id: '895391', title: 'Sunflower', artist: 'Post Malone, Swae Lee', oszFile: '895391 Post Malone, Swae Lee - Sunflower.osz', legendUnlocked: false, img: 'Sun.jpg'}
     ];
@@ -103,10 +103,11 @@ window.addEventListener('load', () => {
     function displayDifficulties(difficulties, songId) {
         const difficultyContainer = document.getElementById('difficultyContainer');
         if (!difficultyContainer) return;
-
+        
         const categories = { easy: [], medium: [], hard: [], legend: [] };
         const songLegendStatus = JSON.parse(localStorage.getItem('songsLegendStatus')) || {};
-        const isLegendUnlocked = songLegendStatus[songId] === true;
+        
+        const isLegendUnlocked = songId === '1750732' ? true : songLegendStatus[songId] === true;
         
         difficulties.forEach(diff => {
             if (diff.approachRate <= 4) categories.easy.push(diff);

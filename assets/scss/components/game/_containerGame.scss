@@ -36,6 +36,25 @@
     top: 96px;
     gap: 5px;
     will-change: transform;
+
+    border: 2px solid #0ff;
+    box-shadow: 0 0 10px #0ff,
+                inset 0 0 10px #0ff;
+    
+    // Animación optimizada
+    @keyframes simpleGlow {
+        0%, 100% {
+            box-shadow: 0 0 10px #0ff,
+                       inset 0 0 10px #0ff;
+        }
+        50% {
+            box-shadow: 0 0 15px #0ff,
+                       inset 0 0 15px #0ff;
+        }
+    }
+    
+    animation: simpleGlow 3s ease-in-out infinite;
+    will-change: box-shadow;
 }
 
 .column {

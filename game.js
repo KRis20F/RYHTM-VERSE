@@ -17,7 +17,18 @@ function preloadImages() {
         './assets/skins/sick.png',
         './assets/skins/good.png',
         './assets/skins/bad.png',
-        // Añade todas las imágenes que necesites precargar
+        './assets/skins/combo.png',
+        './assets/skins/num0.png',
+        './assets/skins/num1.png',
+        './assets/skins/num2.png',
+        './assets/skins/num3.png',
+        './assets/skins/num4.png',
+        './assets/skins/num5.png',
+        './assets/skins/num6.png',
+        './assets/skins/num7.png',
+        './assets/skins/num8.png',
+        './assets/skins/num9.png',
+        './assets/skins/shit.png',
     ];
 
     imageUrls.forEach(url => {
@@ -133,11 +144,6 @@ function parseOsuMap(osuText) {
         }
     }
 
-    if (hitObjects.length === 0) {
-        console.error("No se encontraron objetos en [HitObjects].");
-    } else {
-        console.log("Objetos encontrados:", hitObjects.length);
-    }
 
     return hitObjects;
 }
@@ -147,12 +153,8 @@ function spawnNote(column) {
     const note = document.createElement('div');
     const direction = column.getAttribute('data-direction');
     note.classList.add('note');
-    
-    // Asegurarnos de que la ruta sea correcta
-    note.style.backgroundImage = `url('./assets/img/nota-${direction}.png')`; // Verifica que esta ruta sea correcta
-    
-    // Para debug - verifica si la imagen se está cargando
-    console.log(`Cargando nota: ./assets/img/nota-${direction}.png`);
+
+    note.style.backgroundImage = `url('./assets/img/nota-${direction}.png')`; 
     
     note.style.top = '0px';
     column.appendChild(note);
@@ -173,8 +175,6 @@ function moveNoteDown(note) {
             requestAnimationFrame(animate);
         } else {
             note.remove();
-            currentCombo = 0;
-            updateComboDisplay();
         }
     }
     
@@ -298,7 +298,6 @@ function handleInput(column) {
     const note = notes[0];
     const position = parseFloat(note.style.transform.split('translateY(')[1]) || 0;
 
-    // Rangos separados para PC y móvil
     const ranges = isMobile ? {
         marvelous: { min: 380, max: 460 },
         sick: { min: 340, max: 500 },
@@ -333,13 +332,18 @@ function handleInput(column) {
         updateScore(50);
         showHitValue(50);
         isCorrect = true;
+    } else {
+        showJudgement('shit');
+        updateScore(0);
+        showHitValue(0);
+        currentCombo = 0;
     }
 
     if (isCorrect) {
         note.remove();
         currentCombo++;
+        console.log('Nuevo combo:', currentCombo);
         maxCombo = Math.max(maxCombo, currentCombo);
-        handleHit(true);
         updateComboDisplay();
     }
 }
@@ -370,7 +374,14 @@ if (isMobile) {
         'd': 0,
         'f': 1,
         'j': 2,
-        'k': 3
+        'k': 3,
+        'a': 0,
+        's': 1,
+        'w': 2,
+        'ArrowLeft': 0,
+        'ArrowDown': 1,
+        'ArrowUp': 2,
+        'ArrowRight': 3
     };
 
     document.addEventListener('keydown', (event) => {
@@ -479,43 +490,24 @@ function deactivateFireEffect() {fireImage.classList.remove('fire-effect'); }
 
 function updateComboDisplay() {
     let comboDisplay = document.getElementById('comboDisplay');
+    
     if (!comboDisplay) {
-        const comboDiv = document.createElement('div');
-        comboDiv.id = 'comboDisplay';
-        comboDiv.className = 'combo-display';
-        document.body.appendChild(comboDiv);
-        comboDisplay = document.getElementById('comboDisplay');
+        comboDisplay = document.createElement('div');
+        comboDisplay.id = 'comboDisplay';
+        comboDisplay.className = 'combo-display';
+        document.body.appendChild(comboDisplay);
     }
 
-    if (currentCombo > 0) {
+    if (currentCombo > 1) {
         comboDisplay.innerHTML = `
-            <img src="./assets/skins/combo.png" class="combo-text" alt="combo">
-            <div class="combo-numbers"></div>
+            <img src="./assets/skins/combo.png" class="combo-text">
+            <div class="combo-numbers">
+                ${currentCombo.toString().split('').map(num => 
+                    `<img src="./assets/skins/num${num}.png">`
+                ).join('')}
+            </div>
         `;
-        
-        const comboNumbers = comboDisplay.querySelector('.combo-numbers');
-        const comboStr = currentCombo.toString();
-        
-        comboStr.split('').forEach(num => {
-            const imgContainer = document.createElement('div');
-            imgContainer.style.display = 'inline-block';
-            
-            const img = document.createElement('img');
-            img.src = `./assets/skins/num${num}.png`;
-            img.style.height = '30px';
-            img.style.width = 'auto';
-            
-            img.onerror = () => {
-                imgContainer.textContent = num;
-            };
-            
-            imgContainer.appendChild(img);
-            comboNumbers.appendChild(imgContainer);
-        });
-        
-        comboDisplay.style.display = 'block';
-        comboDisplay.classList.add('combo-pop');
-        setTimeout(() => comboDisplay.classList.remove('combo-pop'), 100);
+        comboDisplay.style.display = 'flex';
     } else {
         comboDisplay.style.display = 'none';
     }
