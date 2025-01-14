@@ -9,7 +9,6 @@
     color: white;
     min-height: 86vh;
     overflow-y: auto;
-    overflow-x: hidden;
   }@else if $page == 'complete' {
     background-image: url('../img/wallpaper2.webp');
     background-attachment: fixed;

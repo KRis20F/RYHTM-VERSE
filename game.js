@@ -337,15 +337,17 @@ function handleInput(column) {
         updateScore(0);
         showHitValue(0);
         currentCombo = 0;
+        loseLife(); //RAFA, Comentar esto si pierdes, puedas debugear mejor jefe
     }
 
     if (isCorrect) {
         note.remove();
         currentCombo++;
-        console.log('Nuevo combo:', currentCombo);
         maxCombo = Math.max(maxCombo, currentCombo);
         updateComboDisplay();
     }
+
+    handleHit(isCorrect)
 }
 
 function throttle(func, limit) {
