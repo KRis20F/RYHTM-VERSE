@@ -55,6 +55,9 @@ function checkUnlockLegend(gameData) {
 function calculateAccuracy(score) {
     
     const maxPossibleScore = 1500; 
+
+    const validScore = Math.min(score, maxPossibleScore);
+    
     return (score / maxPossibleScore) * 100;
 }
 
