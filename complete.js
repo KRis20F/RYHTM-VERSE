@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
 
-        const audio = new Audio('./assets/music/Empire.mp3');
+        const audio = new Audio('./assets/music/Empire.m4a');
         audio.volume = 0.5;
         audio.play().catch(error => console.error('Error al reproducir el audio:', error));
     
