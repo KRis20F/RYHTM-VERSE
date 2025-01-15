@@ -1,52 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
-    try {
-
-        const audio = new Audio('./assets/music/Empire.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(error => console.error('Error al reproducir el audio:', error));
-
-        const gameData = JSON.parse(localStorage.getItem('lastScore'));
+    
+    const gameData = JSON.parse(localStorage.getItem('lastScore'));
+    
+    if (gameData) {
         
-        if (gameData) {
-            
-            checkUnlockLegend(gameData);
+        checkUnlockLegend(gameData);
 
+    
+        const finalScore = document.getElementById('final-score');
+        const maxComboElem = document.getElementById('max-combo');
+        const accuracyElem = document.getElementById('accuracy');
+        const classificationElem = document.getElementById('score-classification');
+
+        if (finalScore) finalScore.textContent = gameData.score;
+        if (maxComboElem) maxComboElem.textContent = gameData.maxCombo;
+        if (accuracyElem) accuracyElem.textContent = calculateAccuracy(gameData.score).toFixed(2);
         
-            const finalScore = document.getElementById('final-score');
-            const maxComboElem = document.getElementById('max-combo');
-            const accuracyElem = document.getElementById('accuracy');
-            const classificationElem = document.getElementById('score-classification');
-
-            if (finalScore) finalScore.textContent = gameData.score;
-            if (maxComboElem) maxComboElem.textContent = gameData.maxCombo;
-            if (accuracyElem) accuracyElem.textContent = calculateAccuracy(gameData.score).toFixed(2);
-            
-            
-            let classification;
-            if (gameData.score >= 60000) {
-                classification = "Master";
-                document.getElementById('Messege').textContent = "Master";
-            } else if (gameData.score >= 40000) {
-                classification = "Pro";
-                document.getElementById('Messege').textContent = "Pro";
-            } else if (gameData.score >= 20000) {
-                classification = "Amateur";
-                document.getElementById('Messege').textContent = "Amateur";
-            } else if (gameData.score >= 10000) {
-                classification = "Beginner";
-                document.getElementById('Messege').textContent = "Beginner";
-            } else {
-                classification = "Noob";
-                document.getElementById('Messege').textContent = "Noob";
-
-            }
-            if (classificationElem) classificationElem.textContent = classification;
-
         
-            showHighScores();
+        let classification;
+        if (gameData.score >= 60000) {
+            classification = "Master";
+            document.getElementById('Messege').textContent = "Master";
+        } else if (gameData.score >= 40000) {
+            classification = "Pro";
+            document.getElementById('Messege').textContent = "Pro";
+        } else if (gameData.score >= 20000) {
+            classification = "Amateur";
+            document.getElementById('Messege').textContent = "Amateur";
+        } else if (gameData.score >= 10000) {
+            classification = "Beginner";
+            document.getElementById('Messege').textContent = "Beginner";
+        } else {
+            classification = "Noob";
+            document.getElementById('Messege').textContent = "Noob";
+
         }
-    } catch (error) {
-        console.error('Error general:', error);
+        if (classificationElem) classificationElem.textContent = classification;
+
+    
+        showHighScores();
     }
 });
 
