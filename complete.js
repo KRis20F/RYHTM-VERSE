@@ -57,8 +57,8 @@ function calculateAccuracy(score) {
     const maxPossibleScore = 1500; 
 
     const validScore = Math.min(score, maxPossibleScore);
-    
-    return (score / maxPossibleScore) * 100;
+
+    return (validScore / maxPossibleScore) * 100;
 }
 
 function showHighScores() {

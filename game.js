@@ -10,7 +10,7 @@ let lives = 3;
 
 const pressedKeys = new Set();
 
-// Función para precargar imágenes
+
 function preloadImages() {
     const imageUrls = [
         './assets/skins/marvelous.png',
