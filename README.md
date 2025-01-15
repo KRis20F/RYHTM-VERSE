@@ -1,9 +1,3 @@
-# RYHTM-VERSE
-
-Proyecto de Juego de ritmo Implementando Html, SCSS, CSS & Javascript hecho por Cristian Gutierrez & Rafael Valerio
-
-Marc, en algunos casos el navegador no permite ejecutar automaticamente los archivos de musica y ejecutar correctamente el flujo del script del juego hasta darle permisos en el navegador para que funcione con normalidad
-
 # 🎵✨ **RYTHM-VERSE** ✨🎵
 
 **Un proyecto de juego de ritmo diseñado para desafiar tus reflejos y sumergirte en el universo de la música.**  
@@ -41,8 +35,8 @@ Para solucionar esto:
 ---
 
 ## 🎨 **Vista previa del diseño**
+<img src="assets/img/demo2.gif" alt="Vista previa del juego" style="border-radius: 10px;">
 <img src="assets/img/demo.gif" alt="Vista previa del juego" style="border-radius: 10px;">
-<img src="assets/img/demo.png" alt="Vista previa del juego" style="border-radius: 10px;">
 
 ---
 
