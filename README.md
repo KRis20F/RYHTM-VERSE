@@ -1,7 +1,7 @@
 # 🎵✨ **RYTHM-VERSE** ✨🎵
 
 **Un proyecto de juego de ritmo diseñado para desafiar tus reflejos y sumergirte en el universo de la música.**  
-Desarrollado con 🎵 por **Cristian Gutiérrez** & **Rafael Valerio**.
+Desarrollado por **Cristian Gutiérrez** & **Rafael Valerio**.🎵
 
 ---
 
