@@ -36,7 +36,6 @@ Para solucionar esto:
 
 ## 🎨 **Vista previa del diseño**
 <img src="assets/img/demo2.gif" alt="Vista previa del juego" style="border-radius: 10px;">
-<img src="assets/img/demo.gif" alt="Vista previa del juego" style="border-radius: 10px;">
 
 ---
 
@@ -49,4 +48,4 @@ Para solucionar esto:
 ## 💡 **Instrucciones de Uso**
 1. Descarga o clona este repositorio.  
    ```bash
-   git clone https://github.com/tu-repositorio/rythm-verse.git
+   git clone https://github.com/KRis20F/RYHTM-VERSE.git
