@@ -49,3 +49,11 @@ Para solucionar esto:
 1. Descarga o clona este repositorio.  
    ```bash
    git clone https://github.com/KRis20F/RYHTM-VERSE.git
+
+
+
+## 🤖 **Localizacion del APK
+
+   ```bash
+   RYHTM-VERSE\APK\platforms\android\app\build\outputs\apk\debug
+
