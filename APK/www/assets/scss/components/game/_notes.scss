@@ -1,0 +1,54 @@
+@use '../../abstracts/mixins' as mix;
+
+.note {
+    width: 90%;
+    height: 80px;
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+    z-index: 1;
+    will-change: top;
+}
+
+.hit-zone.pressed {
+    transform: scale(0.9);
+    filter: brightness(1.5);
+}
+
+
+$hit-zone-rotations: (
+  1: 180,
+  2: 90,
+  3: -90,
+  4: 0
+);
+
+@each $column, $rotation in $hit-zone-rotations {
+  .column:nth-child(#{$column}) > .hit-zone {
+    transform: rotate(#{$rotation}deg);
+  }
+}
+
+.note {
+  &.down {
+    @include mix.note-rotation(90) ;
+  }
+  
+  &.up {
+    @include mix.note-rotation(-90);
+  }
+  
+  &.left {
+    
+    @include mix.note-rotation(-179);
+  }
+  
+  &.right {
+    @include mix.note-rotation(358);
+  }
+}
+
+.hold-active {
+  background-color: rgba(255, 255, 0, 0.5);
+}

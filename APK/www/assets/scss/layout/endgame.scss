@@ -1,0 +1,149 @@
+@use 'sass:map';
+@use '../abstracts/variables' as vars;
+@use '../abstracts/mixins' as mix;
+@use '../base/animations' as anim;
+@use '../base/typography' as typ;
+
+
+#title {
+  @include typ.h1;
+
+  > img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+    width: 450px;
+    margin-bottom: 10px;
+  }
+}
+
+#title {
+  @include mix.gradient-text;
+}
+
+h2 {
+    position: static;
+  @include mix.gradient-text;
+}
+
+#Container-dificuld {
+  color: map.get(vars.$colors, text-light);
+  text-align: center;
+  font-family: vars.$font-secondary;
+  font-size: 1.2em;
+}
+
+.welcome-user {
+  font-size: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: vars.$font-primary;
+  color: map.get(vars.$colors, text-light);
+  text-transform: uppercase;
+}
+
+#welcome-user > * {
+  font-size: 30px;
+}
+
+#Scores {
+  margin-top: 1.3em;
+  display: flex;
+  justify-content: center;
+  gap: 50px;
+}
+
+.score {
+  padding: 1.2em;
+  border-radius: 20px;
+  background: map.get(vars.$colors, background-dark);
+  color: map.get(vars.$colors, text-light);
+  box-shadow: 0 0 15px map.get(vars.$colors, accent-neon-pink);
+  transition: transform 0.3s, box-shadow 0.3s;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 30px map.get(vars.$colors, accent-neon-cyan),
+                0 0 20px map.get(vars.$colors, accent-neon-pink);
+  }
+}
+
+.copy {
+  margin-block: 4em;
+  font-size: 1.2em;
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  justify-content: center;
+}
+
+.kristopher1,
+.reifa1 {
+  display: flex;
+  align-content: center;
+  justify-content: center;
+}
+
+#github {
+  @include mix.gradient-text;
+  margin-left: 5px;
+}
+
+#tutorial-popup {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  &:target {
+    display: flex;
+  }
+}
+
+.tutorial-content {
+  background: map.get(vars.$colors, background-dark);
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 400px;
+  text-align: left;
+  color: map.get(vars.$colors, text-light);
+  box-shadow: 0 0 20px map.get(vars.$colors, accent-neon-cyan);
+
+  h2 {
+    margin-top: 0;
+    font-family: vars.$font-primary;
+    font-size: 2em;
+    color: map.get(vars.$colors, accent-neon-cyan);
+    text-transform: uppercase;
+    text-align: center;
+  }
+
+  strong {
+    font-size: 35px;
+  }
+
+  a.close-tutorial {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: map.get(vars.$colors, accent-neon-pink);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-family: vars.$font-primary;
+  }
+}
+
+.buttons-tutorials {
+  display: flex;
+}
+

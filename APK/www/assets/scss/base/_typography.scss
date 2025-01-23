@@ -1,0 +1,41 @@
+@use '../abstracts/variables' as vars;
+@use 'sass:map';
+
+@mixin h1() {
+  text-align: center;
+  font-family: vars.$font-primary;    
+  font-size: 3em;   
+  text-transform: uppercase;    
+  color: transparent;   
+  background: var(--gradient-animation);    
+  background-size: 300% 300%;   
+  -webkit-background-clip: text;    
+  -webkit-text-stroke: 1px var(--text-light);   
+  filter: drop-shadow(2px 2px 15px var(--highlight-blue));
+  animation: bg-shift 5s ease-in-out infinite alternate;    
+}
+
+h1 {
+  @include h1;
+  > img {
+    max-width: 100%;
+    height: auto;
+    display: inline-block;
+    width: 450px;
+    margin-bottom: 10px;
+  }
+}
+
+.welcome-user {
+  font-size: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: vars.$font-primary;
+  color: var(--text-light);
+  text-transform: uppercase;
+
+  > * {
+    font-size: 30px;
+  }
+} 

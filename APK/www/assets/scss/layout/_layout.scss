@@ -1,0 +1,65 @@
+@mixin body-styles($page: 'default') {
+  @if $page == 'main-pages' {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-image: url('../img/wallpaperNew.webp');
+    background-size: cover;
+    background-attachment: fixed;
+    color: white;
+    min-height: 86vh;
+  }@else if $page == 'complete' {
+    background-image: url('../img/wallpaper2.webp');
+    background-attachment: fixed;
+  }@else if $page == 'endgame' {
+    background-image: url('../skins/bgBlue.png');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    box-sizing: border-box;
+    overflow: hidden;
+    min-height: 100vh;
+  } 
+  @else {
+    background: black;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    will-change: transform;
+  }
+}
+
+// Aplicar estilos según la clase del body
+body {
+  @include body-styles('default');
+
+  &.complete {
+    @include body-styles('complete');
+  }
+  
+  &.endgame {
+    @include body-styles('endgame');
+  }
+  &.main-page {
+    @include body-styles('main-pages');
+  }
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  z-index: 2;
+} 
+
+.select {
+  display: flex;
+  height: 70vh;
+}
+
+.song-w {
+  font-size: 2.4em;
+  text-align: center;
+  color: white;
+  margin-inline: 56px;
+
+}
